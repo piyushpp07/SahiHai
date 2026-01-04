@@ -71,12 +71,12 @@ export const checkScam = async (req: Request, res: Response) => {
     const imagePart = fileToGenerativePart(fileData, mimetype);
 
     logger.debug("checkScam: Getting Gemini model");
-    const model = genAI.getGenerativeModel({ model: "models/gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "models/gemini-2.0-flash" });
 
     const prompt =
       "Analyze this screenshot. Look for keywords like 'Part-time job', 'KYC Update', 'Lottery', or suspicious URLs. Identify if this matches common Indian cyber fraud patterns. Return JSON: { isScam: boolean, riskLevel: 'High'|'Medium'|'Low', reason: string }.";
 
-    logger.info("checkScam: Calling Gemini API with models/gemini-pro");
+    logger.info("checkScam: Calling Gemini API with models/gemini-2.0-flash");
 
     let result;
     try {
