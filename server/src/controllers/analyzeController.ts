@@ -3,6 +3,14 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
 import path from "path";
 
+// Logger utility
+const logger = {
+  info: (msg: string, data?: any) => console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, data || ''),
+  error: (msg: string, error?: any) => console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`, error || ''),
+  warn: (msg: string, data?: any) => console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, data || ''),
+  debug: (msg: string, data?: any) => console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ''),
+};
+
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
 const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
@@ -22,15 +30,27 @@ function fileToGenerativePart(buffer: Buffer, mimeType: string) {
 
 export const analyzeMedia = async (req: Request, res: Response) => {
   if (!req.file) {
+    logger.warn("analyzeMedia: No file uploaded");
     return res.status(400).json({ message: "No file uploaded." });
   }
 
   const { buffer, mimetype, originalname } = req.file;
 
+  logger.info("analyzeMedia: Processing file", {
+    filename: originalname,
+    mimetype,
+    size: buffer.length
+  });
+
   let geminiOutput: string = "";
   let mediaType: "image" | "audio";
 
   try {
+    logger.info("analyzeMedia: Checking API keys", {
+      hasGemini: !!process.env.GEMINI_KEY,
+      hasGroq: !!process.env.GROQ_API_KEY
+    });
+
     const chat = geminiModel.startChat({
       history: [],
       generationConfig: {
@@ -40,12 +60,14 @@ export const analyzeMedia = async (req: Request, res: Response) => {
 
     if (mimetype.startsWith("image/")) {
       mediaType = "image";
+      logger.info("analyzeMedia: Processing image with Gemini");
       const prompt =
         'Extract items and prices from this bill. Return the data as a JSON object with \'items\' (an array of objects with \'name\' and \'price\' properties) and \'total\' (a number) properties. Example: { "items": [ { "name": "Item1", "price": 100 }, { "name": "Item2", "price": 200 } ], "total": 300 }';
       const imagePart = fileToGenerativePart(buffer, mimetype);
       const result = await chat.sendMessage([prompt, imagePart]);
       const response = await result.response;
       geminiOutput = response.text();
+      logger.debug("analyzeMedia: Gemini response received", { length: geminiOutput.length });
     } else if (mimetype.startsWith("audio/")) {
       mediaType = "audio";
       const prompt =

@@ -5,6 +5,18 @@ import OpenAI from "openai";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
+// Logger utility
+const logger = {
+  info: (msg: string, data?: any) =>
+    console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, data || ""),
+  error: (msg: string, error?: any) =>
+    console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`, error || ""),
+  warn: (msg: string, data?: any) =>
+    console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, data || ""),
+  debug: (msg: string, data?: any) =>
+    console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ""),
+};
+
 interface ScanContext {
   fraudScore?: number;
   summary?: string;
@@ -44,12 +56,18 @@ export const consultAssistant = async (req: Request, res: Response) => {
   }: { userMessage: string; scanContext: ScanContext } = req.body;
 
   if (!userMessage || !scanContext) {
+    logger.warn("Missing userMessage or scanContext in request body");
     return res.status(400).json({
       message: "Missing userMessage or scanContext in the request body.",
     });
   }
 
   try {
+    logger.debug("consultAssistant called", {
+      hasGroqKey: !!process.env.GROQ_API_KEY,
+      hasOpenAIKey: !!process.env.OPENAI_API_KEY,
+    });
+
     const systemPrompt = getSystemPrompt(scanContext, userMessage);
 
     let reply: string | undefined;
@@ -57,6 +75,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
     // Try Groq first
     if (process.env.GROQ_API_KEY) {
       try {
+        logger.info("Attempting Groq API call (mixtral-8x7b-32768)");
         const chatCompletion = await groq.chat.completions.create({
           messages: [
             {
@@ -74,30 +93,51 @@ export const consultAssistant = async (req: Request, res: Response) => {
         });
 
         reply = chatCompletion.choices[0]?.message?.content;
-      } catch (groqError) {
-        console.warn("Groq API failed, falling back to OpenAI:", groqError);
+        logger.info("✅ Groq API call successful", {
+          replyLength: reply?.length,
+        });
+      } catch (groqError: any) {
+        logger.error("❌ Groq API failed, falling back to OpenAI:", {
+          message: groqError?.message,
+          status: groqError?.status,
+        });
       }
+    } else {
+      logger.warn("GROQ_API_KEY not configured, skipping Groq");
     }
 
     // Fallback to OpenAI if Groq fails or is not configured
     if (!reply && process.env.OPENAI_API_KEY) {
-      const chatCompletion = await openai.chat.completions.create({
-        model: "gpt-3.5-turbo",
-        messages: [
-          {
-            role: "system",
-            content: systemPrompt,
-          },
-          {
-            role: "user",
-            content: userMessage,
-          },
-        ],
-        temperature: 0.5,
-        max_tokens: 512,
-      });
+      try {
+        logger.info("Attempting OpenAI API call (gpt-3.5-turbo)");
+        const chatCompletion = await openai.chat.completions.create({
+          model: "gpt-3.5-turbo",
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt,
+            },
+            {
+              role: "user",
+              content: userMessage,
+            },
+          ],
+          temperature: 0.5,
+          max_tokens: 512,
+        });
 
-      reply = chatCompletion.choices[0]?.message?.content || undefined;
+        reply = chatCompletion.choices[0]?.message?.content || undefined;
+        logger.info("✅ OpenAI API call successful", {
+          replyLength: reply?.length,
+        });
+      } catch (openaiError: any) {
+        logger.error("❌ OpenAI API failed:", {
+          message: openaiError?.message,
+          status: openaiError?.status,
+        });
+      }
+    } else if (!reply) {
+      logger.warn("OPENAI_API_KEY not configured, skipping OpenAI fallback");
     }
 
     if (!reply) {
@@ -106,11 +146,16 @@ export const consultAssistant = async (req: Request, res: Response) => {
       );
     }
 
+    logger.info("✅ Consultation successful", { replyLength: reply.length });
     res.status(200).json({ reply });
-  } catch (error) {
-    console.error("Error during assistant consultation:", error);
-    res
-      .status(500)
-      .json({ message: "Failed to get a response from the assistant." });
+  } catch (error: any) {
+    logger.error("❌ Error during assistant consultation:", {
+      message: error?.message,
+      stack: error?.stack?.split("\n")[0],
+    });
+    res.status(500).json({
+      message: "Failed to get a response from the assistant.",
+      error: error?.message,
+    });
   }
 };

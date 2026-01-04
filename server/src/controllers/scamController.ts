@@ -2,6 +2,14 @@ import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import fs from "fs";
 
+// Logger utility
+const logger = {
+  info: (msg: string, data?: any) => console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, data || ''),
+  error: (msg: string, error?: any) => console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`, error || ''),
+  warn: (msg: string, data?: any) => console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, data || ''),
+  debug: (msg: string, data?: any) => console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ''),
+};
+
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
 
 function fileToGenerativePart(pathOrBuffer: string | Buffer, mimeType: string) {
@@ -27,13 +35,17 @@ export const checkScam = async (req: Request, res: Response) => {
   const file = req.file as Express.Multer.File | undefined;
 
   if (!file) {
+    logger.warn("checkScam: No file uploaded");
     return res.status(400).json({ error: "No file uploaded." });
   }
 
   const mimetype = file.mimetype || "image/jpeg";
   const fileData = file.path || file.buffer;
 
-  try {
+  logger.info("checkScam: Processing scam detection", {
+    fileSize: typeof fileData === 'string' ? 'file path' : (fileData as Buffer).length,
+    mimetype
+  });  try {
     const imagePart = fileToGenerativePart(fileData, mimetype);
     const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
     const prompt =

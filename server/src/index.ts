@@ -15,6 +15,20 @@ import { draftLetter } from "./controllers/sarkariController";
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Logger utility
+const logger = {
+  info: (msg: string, data?: any) =>
+    console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, data || ""),
+  error: (msg: string, error?: any) =>
+    console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`, error || ""),
+  warn: (msg: string, data?: any) =>
+    console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, data || ""),
+  debug: (msg: string, data?: any) =>
+    console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ""),
+};
+
+logger.info("🚀 SahiHai Server Starting...");
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -78,33 +92,82 @@ const upload = multer({
 const MONGO_URI = process.env.MONGO_URI;
 
 if (MONGO_URI) {
+  logger.info("Attempting MongoDB connection...", {
+    uri: MONGO_URI.substring(0, 50) + "...",
+  });
   mongoose
     .connect(MONGO_URI)
-    .then(() => console.log("MongoDB connected successfully."))
-    .catch((err) => console.error("MongoDB connection error:", err));
+    .then(() => logger.info("✅ MongoDB connected successfully."))
+    .catch((err) => logger.error("❌ MongoDB connection error:", err));
 } else {
-  console.warn(
-    "MONGO_URI not found in .env file. Database features will be disabled."
+  logger.warn(
+    "⚠️ MONGO_URI not found in .env file. Database features will be disabled."
   );
 }
 
 // Routes
 app.get("/", (req, res) => {
+  logger.info("GET / - Root endpoint called");
   res.send("SahiHai Server is running!");
 });
 
 // Scanning and Analysis
-app.post("/api/analyze", upload.single("mediaFile"), analyzeMedia);
-app.post("/api/chat/consult", consultAssistant);
+app.post(
+  "/api/analyze",
+  (req, res, next) => {
+    logger.info("POST /api/analyze - Request received", {
+      contentType: req.headers["content-type"],
+      hasFile: !!req.file,
+    });
+    next();
+  },
+  upload.single("mediaFile"),
+  analyzeMedia
+);
+
+app.post(
+  "/api/chat/consult",
+  (req, res, next) => {
+    logger.info("POST /api/chat/consult - Request received", {
+      userMessage: req.body?.userMessage?.substring(0, 50),
+      hasScanContext: !!req.body?.scanContext,
+    });
+    next();
+  },
+  consultAssistant
+);
 
 // Scam Detection Route
-app.post("/api/scam/check", upload.single("file"), checkScam);
+app.post(
+  "/api/scam/check",
+  (req, res, next) => {
+    logger.info("POST /api/scam/check - Request received", {
+      contentType: req.headers["content-type"],
+      hasFile: !!req.file,
+    });
+    next();
+  },
+  upload.single("file"),
+  checkScam
+);
 
 // Sarkari Letter Draft Route
-app.post("/api/sarkari/draft", upload.single("file"), draftLetter);
+app.post(
+  "/api/sarkari/draft",
+  (req, res, next) => {
+    logger.info("POST /api/sarkari/draft - Request received", {
+      contentType: req.headers["content-type"],
+      hasFile: !!req.file,
+    });
+    next();
+  },
+  upload.single("file"),
+  draftLetter
+);
 
 // Recent Scans Route
 app.get("/api/scans", (req, res) => {
+  logger.info("GET /api/scans - Fetching recent scans");
   res.status(200).json({
     scans: [],
     totalSaved: 0,
@@ -112,14 +175,58 @@ app.get("/api/scans", (req, res) => {
 });
 
 // History and Stats
-app.get("/api/scans/history", getScanHistory);
-app.get("/api/scans/stats", getScanStats);
+app.get(
+  "/api/scans/history",
+  (req, res, next) => {
+    logger.info("GET /api/scans/history - Request received");
+    next();
+  },
+  getScanHistory
+);
+
+app.get(
+  "/api/scans/stats",
+  (req, res, next) => {
+    logger.info("GET /api/scans/stats - Request received");
+    next();
+  },
+  getScanStats
+);
+
+// Error handling middleware
+app.use(
+  (
+    err: any,
+    req: express.Request,
+    res: express.Response,
+    next: express.NextFunction
+  ) => {
+    logger.error("Error caught by middleware:", {
+      message: err.message,
+      status: err.status || 500,
+      path: req.path,
+      method: req.method,
+    });
+
+    if (err.status === 400 && err.message.includes("Invalid file type")) {
+      return res.status(400).json({ error: err.message });
+    }
+
+    res.status(err.status || 500).json({
+      error: err.message || "Internal Server Error",
+      path: req.path,
+      timestamp: new Date().toISOString(),
+    });
+  }
+);
 
 // Start Server (only in non-serverless environments)
 if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
   app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
+    logger.info(`✅ Server is running on http://localhost:${PORT}`);
   });
+} else {
+  logger.info("✅ Running in Vercel serverless mode");
 }
 
 export default app;
