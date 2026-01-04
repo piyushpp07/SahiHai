@@ -17,7 +17,7 @@ const logger = {
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-pro-vision" });
+const geminiModel = genAI.getGenerativeModel({ model: "models/gemini-pro" });
 
 // Initialize Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY as string });
@@ -71,7 +71,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
 
       try {
         logger.info(
-          "analyzeMedia: Attempting Gemini image analysis with gemini-pro-vision"
+          "analyzeMedia: Attempting Gemini image analysis with models/gemini-pro"
         );
         const result = await chat.sendMessage([prompt, imagePart]);
         const response = await result.response;
