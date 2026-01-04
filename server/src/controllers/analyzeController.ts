@@ -5,10 +5,14 @@ import path from "path";
 
 // Logger utility
 const logger = {
-  info: (msg: string, data?: any) => console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, data || ''),
-  error: (msg: string, error?: any) => console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`, error || ''),
-  warn: (msg: string, data?: any) => console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, data || ''),
-  debug: (msg: string, data?: any) => console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ''),
+  info: (msg: string, data?: any) =>
+    console.log(`[INFO] ${new Date().toISOString()} - ${msg}`, data || ""),
+  error: (msg: string, error?: any) =>
+    console.error(`[ERROR] ${new Date().toISOString()} - ${msg}`, error || ""),
+  warn: (msg: string, data?: any) =>
+    console.warn(`[WARN] ${new Date().toISOString()} - ${msg}`, data || ""),
+  debug: (msg: string, data?: any) =>
+    console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ""),
 };
 
 // Initialize Gemini
@@ -39,7 +43,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
   logger.info("analyzeMedia: Processing file", {
     filename: originalname,
     mimetype,
-    size: buffer.length
+    size: buffer.length,
   });
 
   let geminiOutput: string = "";
@@ -48,7 +52,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
   try {
     logger.info("analyzeMedia: Checking API keys", {
       hasGemini: !!process.env.GEMINI_KEY,
-      hasGroq: !!process.env.GROQ_API_KEY
+      hasGroq: !!process.env.GROQ_API_KEY,
     });
 
     const chat = geminiModel.startChat({
@@ -67,7 +71,9 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       const result = await chat.sendMessage([prompt, imagePart]);
       const response = await result.response;
       geminiOutput = response.text();
-      logger.debug("analyzeMedia: Gemini response received", { length: geminiOutput.length });
+      logger.debug("analyzeMedia: Gemini response received", {
+        length: geminiOutput.length,
+      });
     } else if (mimetype.startsWith("audio/")) {
       mediaType = "audio";
       const prompt =
@@ -85,12 +91,10 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       parsedGeminiOutput = JSON.parse(geminiOutput);
     } catch (parseError) {
       console.error("Gemini output is not valid JSON:", geminiOutput);
-      return res
-        .status(500)
-        .json({
-          message: "AI analysis failed to return valid JSON.",
-          rawOutput: geminiOutput,
-        });
+      return res.status(500).json({
+        message: "AI analysis failed to return valid JSON.",
+        rawOutput: geminiOutput,
+      });
     }
 
     let groqAnalysis = {};
@@ -132,12 +136,14 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       // You might want to save this to MongoDB here
     });
   } catch (error: unknown) {
-    console.error("Error during media analysis:", error);
-    res
-      .status(500)
-      .json({
-        message: "Failed to analyze media.",
-        error: error instanceof Error ? error.message : String(error),
-      });
+    logger.error("❌ Error during media analysis:", {
+      message: error instanceof Error ? error.message : String(error),
+      stack: error instanceof Error ? error.stack?.split('\n')[0] : undefined
+    });
+    res.status(500).json({
+      message: "Failed to analyze media.",
+      error: error instanceof Error ? error.message : String(error),
+      timestamp: new Date().toISOString()
+    });
   }
 };
