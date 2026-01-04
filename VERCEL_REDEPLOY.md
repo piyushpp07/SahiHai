@@ -9,6 +9,7 @@ Your deployment at `https://sahi-hai-tau.vercel.app` is not routing correctly. L
 Since you exposed your `.env` file, you **must** regenerate all keys:
 
 #### 1.1 Google Gemini API Key
+
 ```bash
 # Go to: https://aistudio.google.com/app/apikeys
 # 1. Delete your current key (YAIzaSyCW1YR9Enm...)
@@ -17,6 +18,7 @@ Since you exposed your `.env` file, you **must** regenerate all keys:
 ```
 
 #### 1.2 Groq API Key
+
 ```bash
 # Go to: https://console.groq.com/keys
 # 1. Delete current key (gsk_j7YTL8oWzI3Y...)
@@ -25,6 +27,7 @@ Since you exposed your `.env` file, you **must** regenerate all keys:
 ```
 
 #### 1.3 MongoDB Password
+
 ```bash
 # Go to: https://cloud.mongodb.com/
 # 1. Database Access → piyush user
@@ -62,6 +65,7 @@ npm run dev
 ```
 
 Then test:
+
 ```bash
 curl http://localhost:5051/
 ```
@@ -177,18 +181,21 @@ npx expo start -c
 ## Expected Responses
 
 ### Health Check
+
 ```bash
 $ curl https://sahi-hai-tau.vercel.app/
 SahiHai Server is running!
 ```
 
 ### Get Scans
+
 ```bash
 $ curl https://sahi-hai-tau.vercel.app/api/scans
 {"scans":[],"totalSaved":0}
 ```
 
 ### Scan History (with device ID)
+
 ```bash
 $ curl -H "x-device-id: test-device" https://sahi-hai-tau.vercel.app/api/scans/history
 []
@@ -199,6 +206,7 @@ $ curl -H "x-device-id: test-device" https://sahi-hai-tau.vercel.app/api/scans/h
 ## Debugging
 
 ### Check Vercel Build Logs
+
 ```bash
 # Via CLI
 vercel logs --prod
@@ -208,19 +216,20 @@ vercel logs --prod
 ```
 
 ### Check Function Logs
+
 ```bash
 vercel logs --prod --follow
 ```
 
 ### Common Issues & Solutions
 
-| Issue | Solution |
-|-------|----------|
-| `Module not found` | Run `npm install` locally, verify build works |
-| `404 on all routes` | Check `vercel.json` routing configuration |
+| Issue                      | Solution                                              |
+| -------------------------- | ----------------------------------------------------- |
+| `Module not found`         | Run `npm install` locally, verify build works         |
+| `404 on all routes`        | Check `vercel.json` routing configuration             |
 | `MongoDB connection error` | Verify MONGO_URI in Vercel env, whitelist IP in Atlas |
-| `API key errors` | Regenerate keys, update in Vercel dashboard |
-| `Timeout errors` | Increase `maxDuration` in `vercel.json` |
+| `API key errors`           | Regenerate keys, update in Vercel dashboard           |
+| `Timeout errors`           | Increase `maxDuration` in `vercel.json`               |
 
 ---
 
@@ -245,6 +254,7 @@ vercel logs --prod --follow
 ```
 
 **Why these changes?**
+
 - `buildCommand`: Explicit build step
 - `outputDirectory`: Tells Vercel where compiled code is
 - `@vercel/node@3.0.0`: Latest runtime

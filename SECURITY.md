@@ -7,18 +7,21 @@ Your `.env` file containing API keys and MongoDB credentials was exposed. **You 
 ### 1. Regenerate All Credentials
 
 #### Google Gemini API Key
+
 - Go to [Google AI Studio](https://aistudio.google.com/app/apikeys)
 - Delete the exposed key
 - Create a new API key
 - Update `GEMINI_API_KEY` in Vercel
 
 #### Groq API Key
+
 - Go to [Groq Console](https://console.groq.com/keys)
 - Delete the exposed key
 - Create a new API key
 - Update `GROQ_API_KEY` in Vercel
 
 #### MongoDB Password
+
 - Go to [MongoDB Atlas](https://cloud.mongodb.com/)
 - Navigate to Database Access
 - Delete the exposed user password
@@ -45,6 +48,7 @@ vercel --prod
 ```
 
 Or use the Vercel Dashboard:
+
 1. Go to your project settings
 2. Select "Environment Variables"
 3. Add all variables (see `.env.example`)
@@ -53,12 +57,14 @@ Or use the Vercel Dashboard:
 ### 3. Local Development Best Practices
 
 **Never commit `.env` file:**
+
 ```bash
 # .gitignore already has this, but verify:
 cat .gitignore | grep "^.env"
 ```
 
 **Always use `.env.local`:**
+
 ```bash
 # Copy the example
 cp server/.env.example server/.env.local
@@ -68,6 +74,7 @@ cp server/.env.example server/.env.local
 ```
 
 **Verify `.env` is in `.gitignore`:**
+
 ```
 server/.env          ✅ Ignored
 server/.env.local    ✅ Ignored
@@ -87,6 +94,7 @@ git log --all --full-history -- "server/.env"
 ### 5. Enable Git Hooks (Optional but Recommended)
 
 Create `.git/hooks/pre-commit`:
+
 ```bash
 #!/bin/bash
 # Prevent accidental .env commits
@@ -99,6 +107,7 @@ fi
 ```
 
 Make it executable:
+
 ```bash
 chmod +x .git/hooks/pre-commit
 ```
@@ -106,12 +115,14 @@ chmod +x .git/hooks/pre-commit
 ### 6. Environment Variables Configuration
 
 **For Local Development:**
+
 ```
 server/.env.local (git ignored)
 client/.env.local (git ignored)
 ```
 
 **For Vercel Deployment:**
+
 ```
 Set in Vercel Dashboard → Settings → Environment Variables
 ```
@@ -137,6 +148,7 @@ EXPO_PUBLIC_API_URL=https://your-vercel-deployment.vercel.app
 ### 7. Monitoring & Alerts
 
 Enable GitHub secret scanning:
+
 1. Go to your repository
 2. Settings → Security & analysis
 3. Enable "Secret scanning"
@@ -173,37 +185,45 @@ curl https://your-vercel-deployment.vercel.app/
 ## Additional Security Measures
 
 ### API Key Rotation Schedule
+
 - 🔄 Rotate keys every 90 days in production
 - 🔄 Rotate immediately if exposed
 
 ### Rate Limiting
+
 Consider adding rate limiting to prevent abuse:
+
 ```javascript
 // In server/src/index.ts
-const rateLimit = require('express-rate-limit');
+const rateLimit = require("express-rate-limit");
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100 // limit each IP to 100 requests per windowMs
+  max: 100, // limit each IP to 100 requests per windowMs
 });
 
 app.use(limiter);
 ```
 
 ### CORS Configuration
+
 Verify CORS is properly configured in `server/src/index.ts`:
+
 ```javascript
-app.use(cors({
-  origin: [
-    'http://localhost:3000',
-    'http://192.168.1.34:8081',
-    'https://your-domain.com'
-  ],
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: [
+      "http://localhost:3000",
+      "http://192.168.1.34:8081",
+      "https://your-domain.com",
+    ],
+    credentials: true,
+  })
+);
 ```
 
 ### MongoDB Security
+
 - ✅ Use strong passwords (20+ characters)
 - ✅ Enable IP whitelist in MongoDB Atlas
 - ✅ Use read-only user for non-admin operations
