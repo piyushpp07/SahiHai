@@ -83,7 +83,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       // Step 1: Try Groq (Primary)
       try {
         logger.info(
-          "analyzeMedia: Attempting Primary Analysis with Groq (llama-3.2-11b-vision-preview)"
+          "analyzeMedia: Attempting Primary Analysis with Groq (llama-4-scout-17b-16e-instruct)"
         );
 
         const chatCompletion = await groq.chat.completions.create({
@@ -101,7 +101,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
               ] as any,
             },
           ],
-          model: "llama-3.2-11b-vision-preview",
+          model: "meta-llama/llama-4-scout-17b-16e-instruct",
           temperature: 0.1,
           max_tokens: 1024,
           response_format: { type: "json_object" },
@@ -110,7 +110,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
         const content = chatCompletion.choices[0]?.message?.content;
         if (content) {
           analysisResult = JSON.parse(content);
-          usedModel = "Groq (llama-3.2-11b-vision-preview)";
+          usedModel = "Groq (llama-4-scout-17b-16e-instruct)";
           logger.info("✅ Groq analysis successful");
         } else {
           throw new Error("Empty response from Groq");
@@ -173,12 +173,9 @@ export const analyzeMedia = async (req: Request, res: Response) => {
           .json({ message: "Audio analysis failed", error: e.message });
       }
     } else {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Unsupported file type. Only images and audio are supported.",
-        });
+      return res.status(400).json({
+        message: "Unsupported file type. Only images and audio are supported.",
+      });
     }
 
     // Step 3: Standardize Response

@@ -83,7 +83,7 @@ export const checkScam = async (req: Request, res: Response) => {
     // Step 1: Try Groq (Primary)
     try {
       logger.info(
-        "checkScam: Attempting Primary Analysis with Groq (llama-3.2-11b-vision-preview)"
+        "checkScam: Attempting Primary Analysis with Groq (llama-4-scout-17b-16e-instruct)"
       );
 
       let base64Image: string;
@@ -112,7 +112,7 @@ export const checkScam = async (req: Request, res: Response) => {
             ] as any,
           },
         ],
-        model: "llama-3.2-11b-vision-preview",
+        model: "meta-llama/llama-4-scout-17b-16e-instruct",
         temperature: 0.1,
         max_tokens: 1024,
         response_format: { type: "json_object" },
