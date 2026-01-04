@@ -14,7 +14,7 @@ const logger = {
     console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ""),
 };
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY || "");
 
 function fileToGenerativePart(pathOrBuffer: string | Buffer, mimeType: string) {
   let data: string;
@@ -41,6 +41,15 @@ export const checkScam = async (req: Request, res: Response) => {
   if (!file) {
     logger.warn("checkScam: No file uploaded");
     return res.status(400).json({ error: "No file uploaded." });
+  }
+
+  // Check if GEMINI_KEY is configured
+  if (!process.env.GEMINI_KEY || process.env.GEMINI_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+    logger.error("checkScam: GEMINI_KEY not configured properly");
+    return res.status(500).json({ 
+      error: "Gemini API key not configured. Please check server environment variables.",
+      missingKey: "GEMINI_KEY" 
+    });
   }
 
   const mimetype = file.mimetype || "image/jpeg";
