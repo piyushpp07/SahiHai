@@ -74,7 +74,7 @@ export const analyzeMedia = async (req: Request, res: Response) => {
           { role: "system", content: groqSystemPrompt },
           { role: "user", content: groqUserMessage },
         ],
-        model: "llama3-70b-8192",
+        model: "mixtral-8x7b-32768",
         temperature: 0.5,
         max_tokens: 1024,
       });

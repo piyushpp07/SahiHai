@@ -58,7 +58,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
           content: userMessage,
         },
       ],
-      model: "llama3-70b-8192",
+      model: "mixtral-8x7b-32768",
       temperature: 0.5,
       max_tokens: 512,
     });

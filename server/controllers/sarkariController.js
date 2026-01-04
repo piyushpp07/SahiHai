@@ -33,7 +33,7 @@ const draftLetter = async (req, res) => {
     const groqPrompt = `You are an Indian Legal Aide. The user has this complaint: "${transcript}". Draft a formal letter to the relevant department (e.g., Electricity Board, Municipal Corporation) citing relevant Indian Consumer Protection Acts. Keep it professional.`;
     const groqChatCompletion = await groq.chat.completions.create({
       messages: [{ role: "system", content: groqPrompt }],
-      model: "llama3-70b-8192",
+      model: "mixtral-8x7b-32768",
       response_format: { type: "text" },
       temperature: 0.7,
       max_tokens: 1024,

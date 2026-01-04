@@ -69,7 +69,7 @@ const analyzeMedia = async (req, res) => {
 
       const groqChatCompletion = await groq.chat.completions.create({
         messages: [{ role: "system", content: groqPrompt }],
-        model: "llama3-70b-8192", // Using the updated model
+        model: "mixtral-8x7b-32768", // Using Mixtral-8x7b (llama3-70b-8192 has been decommissioned)
         response_format: { type: "json_object" },
         temperature: 0.7,
         max_tokens: 1024,
