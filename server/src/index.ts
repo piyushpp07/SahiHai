@@ -15,6 +15,14 @@ import {
   generateLetterPDF,
   draftLetterFromText,
 } from "./controllers/sarkariController";
+import {
+  signup,
+  login,
+  getMe,
+  updateProfile,
+  changePassword,
+} from "./controllers/authController";
+import { authMiddleware } from "./middleware/authMiddleware";
 import { connectToDatabase } from "./utils/dbConnect";
 
 const app = express();
@@ -115,7 +123,64 @@ app.get("/", (req, res) => {
   res.send("SahiHai Server is running!");
 });
 
+// ======================
+// Authentication Routes
+// ======================
+app.post(
+  "/api/auth/signup",
+  (req, res, next) => {
+    logger.info("POST /api/auth/signup - Request received", {
+      email: req.body?.email,
+    });
+    next();
+  },
+  signup
+);
+
+app.post(
+  "/api/auth/login",
+  (req, res, next) => {
+    logger.info("POST /api/auth/login - Request received", {
+      email: req.body?.email,
+    });
+    next();
+  },
+  login
+);
+
+app.get(
+  "/api/auth/me",
+  (req, res, next) => {
+    logger.info("GET /api/auth/me - Request received");
+    next();
+  },
+  authMiddleware,
+  getMe
+);
+
+app.put(
+  "/api/auth/update-profile",
+  (req, res, next) => {
+    logger.info("PUT /api/auth/update-profile - Request received");
+    next();
+  },
+  authMiddleware,
+  updateProfile
+);
+
+app.post(
+  "/api/auth/change-password",
+  (req, res, next) => {
+    logger.info("POST /api/auth/change-password - Request received");
+    next();
+  },
+  authMiddleware,
+  changePassword
+);
+
+// ======================
 // Scanning and Analysis
+// ======================
 app.post(
   "/api/analyze",
   (req, res, next) => {

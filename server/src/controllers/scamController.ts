@@ -2,6 +2,7 @@ import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
 import fs from "fs";
+import { SCAM_DETECTION_PROMPT } from "../prompts/marketPrompts";
 
 // Logger utility
 const logger = {
@@ -74,8 +75,7 @@ export const checkScam = async (req: Request, res: Response) => {
     hasGeminiKey: !!process.env.GEMINI_API_KEY,
   });
 
-  const prompt =
-    "Analyze this screenshot. Look for keywords like 'Part-time job', 'KYC Update', 'Lottery', or suspicious URLs. Identify if this matches common Indian cyber fraud patterns. Return JSON: { isScam: boolean, riskLevel: 'High'|'Medium'|'Low', reason: string }.";
+  const prompt = SCAM_DETECTION_PROMPT;
 
   let resultData: any = null;
 

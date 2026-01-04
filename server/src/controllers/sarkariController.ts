@@ -3,6 +3,7 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
 import fs from "fs";
 import { generateSimplePDF } from "../utils/pdfGenerator";
+import { SARKARI_LEGAL_PROMPT } from "../prompts/marketPrompts";
 
 // Import logger from a shared location or create a simple console logger
 const logger = {
@@ -99,7 +100,7 @@ export const draftLetter = async (req: Request, res: Response) => {
     }
 
     // Step 2: Draft legal letter (Groq with fallback)
-    const groqPrompt = `You are an Indian Legal Aide. The user has this complaint: "${transcript}". Draft a formal letter to the relevant department (e.g., Electricity Board, Municipal Corporation) citing relevant Indian Consumer Protection Acts. Keep it professional.`;
+    const groqPrompt = `${SARKARI_LEGAL_PROMPT}\n\nUser Complaint: "${transcript}"\n\nDraft a formal complaint letter based on the above guidelines.`;
 
     let letter = "";
     try {
@@ -230,7 +231,7 @@ export const draftLetterFromText = async (req: Request, res: Response) => {
       model: "models/gemini-2.0-flash",
     });
 
-    const groqPrompt = `You are an Indian Legal Aide. The user has this complaint: "${complaint}". Draft a formal letter to the relevant department (e.g., Electricity Board, Municipal Corporation) citing relevant Indian Consumer Protection Acts. Keep it professional.`;
+    const groqPrompt = `${SARKARI_LEGAL_PROMPT}\n\nUser Complaint: "${complaint}"\n\nDraft a formal complaint letter based on the above guidelines.`;
 
     let letter = "";
 
