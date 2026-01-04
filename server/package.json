@@ -2,7 +2,7 @@
   "name": "server",
   "version": "1.0.0",
   "description": "Backend for SahiHai App",
-  "main": "server.js",
+  "main": "api/index.js",
   "scripts": {
     "build": "tsc",
     "prestart": "npm run build",
