@@ -76,8 +76,26 @@ export const checkScam = async (req: Request, res: Response) => {
     const prompt =
       "Analyze this screenshot. Look for keywords like 'Part-time job', 'KYC Update', 'Lottery', or suspicious URLs. Identify if this matches common Indian cyber fraud patterns. Return JSON: { isScam: boolean, riskLevel: 'High'|'Medium'|'Low', reason: string }.";
 
-    logger.info("checkScam: Calling Gemini API");
-    const result = await model.generateContent([prompt, imagePart]);
+    logger.info("checkScam: Calling Gemini API with gemini-1.5-flash");
+    
+    let result;
+    try {
+      result = await model.generateContent([prompt, imagePart]);
+      logger.info("✅ Gemini API call successful");
+    } catch (geminiError: any) {
+      logger.error("❌ Gemini API call failed", { error: geminiError.message });
+      // For scam detection, we don't have a good fallback since it requires image analysis
+      // Return a safe default response
+      return res.status(500).json({
+        error: "Scam detection temporarily unavailable",
+        details: geminiError.message,
+        fallbackResponse: {
+          isScam: false,
+          riskLevel: "Unknown",
+          reason: "Unable to analyze due to AI service error. Please manually verify any suspicious content."
+        }
+      });
+    }
     const response = await result.response;
 
     logger.debug("checkScam: Parsing AI response");

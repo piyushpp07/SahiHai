@@ -89,7 +89,7 @@ export async function analyzePricing(
           content: `Here is the data from the bill. Please analyze it:\n\n${extractedData}`,
         },
       ],
-      model: "mixtral-8x7b-32768",
+      model: "llama-3.3-70b-versatile",
       temperature: 0.2,
       max_tokens: 2048,
       response_format: { type: "json_object" },

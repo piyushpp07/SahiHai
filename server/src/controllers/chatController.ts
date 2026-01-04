@@ -75,7 +75,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
     // Try Groq first
     if (process.env.GROQ_API_KEY) {
       try {
-        logger.info("Attempting Groq API call (mixtral-8x7b-32768)");
+        logger.info("Attempting Groq API call (llama-3.3-70b-versatile)");
         const chatCompletion = await groq.chat.completions.create({
           messages: [
             {
@@ -87,7 +87,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
               content: userMessage,
             },
           ],
-          model: "mixtral-8x7b-32768",
+          model: "llama-3.3-70b-versatile",
           temperature: 0.5,
           max_tokens: 512,
         });
@@ -97,10 +97,33 @@ export const consultAssistant = async (req: Request, res: Response) => {
           replyLength: reply?.length,
         });
       } catch (groqError: any) {
-        logger.error("❌ Groq API failed, falling back to OpenAI:", {
-          message: groqError?.message,
-          status: groqError?.status,
-        });
+        logger.warn("llama-3.3-70b-versatile failed, trying fallback model", { error: groqError.message });
+        try {
+          // Fallback to mixtral if llama fails
+          const fallbackCompletion = await groq.chat.completions.create({
+            messages: [
+              {
+                role: "system",
+                content: systemPrompt,
+              },
+              {
+                role: "user",
+                content: userMessage,
+              },
+            ],
+            model: "mixtral-8x7b-32768",
+            temperature: 0.5,
+            max_tokens: 512,
+          });
+
+          reply = fallbackCompletion.choices[0]?.message?.content;
+          logger.info("✅ Groq API call successful with fallback model mixtral-8x7b-32768");
+        } catch (fallbackError: any) {
+          logger.error("❌ Both Groq models failed, falling back to OpenAI:", {
+            message: fallbackError?.message,
+            status: fallbackError?.status,
+          });
+        }
       }
     } else {
       logger.warn("GROQ_API_KEY not configured, skipping Groq");
