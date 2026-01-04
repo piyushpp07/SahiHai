@@ -1,25 +1,40 @@
 import React, { useRef, useState } from "react";
 import {
   View,
+  Text,
   TouchableOpacity,
   StyleSheet,
   ActivityIndicator,
 } from "react-native";
-import * as ExpoCamera from "expo-camera";
+import { CameraView, useCameraPermissions } from "expo-camera";
 import { useRouter } from "expo-router";
 import api from "../utils/api";
-
-const Camera = ExpoCamera.default || ExpoCamera.Camera;
 
 export default function ScanCamera() {
   const cameraRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const [permission, requestPermission] = useCameraPermissions();
   const router = useRouter();
+
+  // Request permission if not granted
+  if (!permission) {
+    return <View style={{ flex: 1 }} />;
+  }
+
+  if (!permission.granted) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <TouchableOpacity onPress={requestPermission}>
+          <Text>Grant Camera Permission</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   const takePicture = async () => {
     if (cameraRef.current) {
       setLoading(true);
-      const photo = await cameraRef.current.takePictureAsync({ base64: false });
+      const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
       const formData = new FormData();
       formData.append("mediaFile", {
         uri: photo.uri,
@@ -41,7 +56,12 @@ export default function ScanCamera() {
 
   return (
     <View style={{ flex: 1 }}>
-      <Camera ref={cameraRef} style={{ flex: 1 }} type="back" />
+      <CameraView
+        ref={cameraRef}
+        style={{ flex: 1 }}
+        facing="back"
+        enableTorch={false}
+      />
       <View style={styles.overlay} />
       <TouchableOpacity
         style={styles.captureButton}

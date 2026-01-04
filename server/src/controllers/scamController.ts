@@ -44,11 +44,15 @@ export const checkScam = async (req: Request, res: Response) => {
   }
 
   // Check if GEMINI_KEY is configured
-  if (!process.env.GEMINI_KEY || process.env.GEMINI_KEY === "YOUR_GEMINI_API_KEY_HERE") {
+  if (
+    !process.env.GEMINI_KEY ||
+    process.env.GEMINI_KEY === "YOUR_GEMINI_API_KEY_HERE"
+  ) {
     logger.error("checkScam: GEMINI_KEY not configured properly");
-    return res.status(500).json({ 
-      error: "Gemini API key not configured. Please check server environment variables.",
-      missingKey: "GEMINI_KEY" 
+    return res.status(500).json({
+      error:
+        "Gemini API key not configured. Please check server environment variables.",
+      missingKey: "GEMINI_KEY",
     });
   }
 

@@ -17,7 +17,7 @@ const logger = {
 
 // Initialize Gemini
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY as string);
-const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+const geminiModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash-001" });
 
 // Initialize Groq
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY as string });

@@ -1,7 +1,11 @@
-import { Request, Response } from 'express';
-import { performOCR, analyzePricing, AnalysisResult } from '../services/aiService';
-import { Scan, IScan } from '../models/Scan';
-import mongoose from 'mongoose';
+import { Request, Response } from "express";
+import {
+  performOCR,
+  analyzePricing,
+  AnalysisResult,
+} from "../services/aiService";
+import { Scan, IScan } from "../models/Scan";
+import mongoose from "mongoose";
 
 /**
  * Handles the bill scan request.
@@ -13,14 +17,14 @@ import mongoose from 'mongoose';
  */
 export const scanBill = async (req: Request, res: Response) => {
   if (!req.file) {
-    return res.status(400).json({ message: 'No image file uploaded.' });
+    return res.status(400).json({ message: "No image file uploaded." });
   }
 
-  const deviceId = req.headers['x-device-id'] as string;
+  const deviceId = req.headers["x-device-id"] as string;
 
   // Quick check for DB connection
   if (mongoose.connection.readyState !== 1) {
-     console.warn("MongoDB not connected. Skipping database save.");
+    console.warn("MongoDB not connected. Skipping database save.");
   }
 
   try {
@@ -42,20 +46,28 @@ export const scanBill = async (req: Request, res: Response) => {
       });
       await newScan.save();
     }
-    
+
     // Step 4: Return result to client
     res.status(200).json(analysisResult);
-
   } catch (error) {
-    console.error('Error in scan pipeline:', error);
+    console.error("Error in scan pipeline:", error);
     if (error instanceof Error) {
-        // Simple error check for OCR failures
-        if (error.message.includes("OCR")) {
-            return res.status(422).json({ message: 'Could not read text from image. Please try a clearer photo.' });
-        }
-        return res.status(500).json({ message: 'Internal server error.', error: error.message });
+      // Simple error check for OCR failures
+      if (error.message.includes("OCR")) {
+        return res
+          .status(422)
+          .json({
+            message:
+              "Could not read text from image. Please try a clearer photo.",
+          });
+      }
+      return res
+        .status(500)
+        .json({ message: "Internal server error.", error: error.message });
     }
-    res.status(500).json({ message: 'An unknown internal server error occurred.' });
+    res
+      .status(500)
+      .json({ message: "An unknown internal server error occurred." });
   }
 };
 
@@ -73,7 +85,7 @@ export const getRecentScans = async (req: Request, res: Response) => {
     const scans = await Scan.find().sort({ createdAt: -1 }).limit(10);
     res.status(200).json(scans);
   } catch (error) {
-    console.error('Error fetching recent scans:', error);
-    res.status(500).json({ message: 'Failed to fetch recent scans.' });
+    console.error("Error fetching recent scans:", error);
+    res.status(500).json({ message: "Failed to fetch recent scans." });
   }
 };
