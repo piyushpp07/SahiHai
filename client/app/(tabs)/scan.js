@@ -50,15 +50,17 @@ export default function ScanTab() {
           name: "appliance.jpg",
           type: "image/jpeg",
         });
-        const res = await api.post("/api/appliance/detect", formData, {
-          headers: { "Content-Type": "multipart/form-data" },
-        });
+        // TODO: Implement /api/appliance/detect endpoint in backend
         setLoading(false);
         setShowLoader(false);
-        router.push({
-          pathname: "/result/[id]",
-          params: { id: res.data._id || "detected" },
-        });
+        Alert.alert("Feature", "Appliance detection coming soon!");
+        // const res = await api.post("/api/appliance/detect", formData, {
+        //   headers: { "Content-Type": "multipart/form-data" },
+        // });
+        // router.push({
+        //   pathname: "/result/[id]",
+        //   params: { id: res.data._id || "detected" },
+        // });
       } catch (_error) {
         setLoading(false);
         setShowLoader(false);

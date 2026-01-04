@@ -42,7 +42,7 @@ export default function AudioRecord() {
         name: "audio.m4a",
         type: "audio/m4a",
       });
-      const res = await api.post("/analyze", formData, {
+      const res = await api.post("/api/analyze", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
       router.push(`/result/${res.data.id}`);

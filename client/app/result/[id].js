@@ -11,10 +11,18 @@ export default function ResultScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    api.get(`/result/${id}`).then((res) => {
-      setResult(res.data);
-      setLoading(false);
+    // TODO: Implement /api/result/:id endpoint or use different result handling
+    // For now, just return mock data based on scan from previous screen
+    setResult({
+      lootMeter: 45,
+      flaggedItems: [],
+      totalSaved: 0,
     });
+    setLoading(false);
+    // api.get(`/api/result/${id}`).then((res) => {
+    //   setResult(res.data);
+    //   setLoading(false);
+    // });
   }, [id]);
 
   if (loading) return <SmartLoader />;

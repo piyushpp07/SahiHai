@@ -33,8 +33,11 @@ export default function InventoryTab() {
   const fetchAppliances = async () => {
     try {
       setLoading(true);
-      const res = await api.get("/api/appliance/list");
-      setAppliances(res.data);
+      // TODO: Implement /api/appliance/list endpoint in backend
+      // For now, show empty state
+      setAppliances([]);
+      // const res = await api.get("/api/appliance/list");
+      // setAppliances(res.data);
     } catch (error) {
       console.error("Failed to fetch appliances:", error);
     } finally {

@@ -15,7 +15,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    api.get("/scans").then((res) => {
+    api.get("/api/scans").then((res) => {
       setRecentScans(res.data.scans || []);
       setTotalSaved(res.data.totalSaved || 0);
     });

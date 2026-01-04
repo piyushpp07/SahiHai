@@ -87,12 +87,15 @@ export default function SarkariTab() {
 
     setLoading(true);
     try {
-      // Send manual text to backend for processing if available
-      const res = await api.post("/api/sarkari/draft-text", {
-        complaint: manualInput,
-      });
-      setComplaintText(res.data.letter || res.data);
+      // TODO: Implement /api/sarkari/draft-text endpoint in backend
+      // For now, use manual input as-is
+      setComplaintText(manualInput);
       setManualInput("");
+      // const res = await api.post("/api/sarkari/draft-text", {
+      //   complaint: manualInput,
+      // });
+      // setComplaintText(res.data.letter || res.data);
+      // setManualInput("");
     } catch (_error) {
       // If API doesn't support text, just use it as-is
       setComplaintText(manualInput);
