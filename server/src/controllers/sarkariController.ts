@@ -50,13 +50,17 @@ export const draftLetter = async (req: Request, res: Response) => {
   try {
     // Step 1: Transcribe audio (Gemini)
     const audioPart = fileToGenerativePart(fileData, mimetype);
-    const model = genAI.getGenerativeModel({ model: "models/gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({
+      model: "models/gemini-2.0-flash",
+    });
     const transcriptPrompt =
       "Transcribe this audio. The user may speak in Hindi, English, or Hinglish.";
 
     let transcript = "";
     try {
-      logger.info("sarkariController: Attempting Gemini transcription with models/gemini-2.0-flash");
+      logger.info(
+        "sarkariController: Attempting Gemini transcription with models/gemini-2.0-flash"
+      );
       const transcriptResult = await model.generateContent([
         transcriptPrompt,
         audioPart,
