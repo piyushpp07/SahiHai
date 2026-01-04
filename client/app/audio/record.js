@@ -37,7 +37,7 @@ export default function AudioRecord() {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       const formData = new FormData();
-      formData.append("file", {
+      formData.append("mediaFile", {
         uri,
         name: "audio.m4a",
         type: "audio/m4a",

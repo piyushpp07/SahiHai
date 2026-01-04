@@ -21,7 +21,7 @@ export default function ScanCamera() {
       setLoading(true);
       const photo = await cameraRef.current.takePictureAsync({ base64: false });
       const formData = new FormData();
-      formData.append("file", {
+      formData.append("mediaFile", {
         uri: photo.uri,
         name: "scan.jpg",
         type: "image/jpeg",
