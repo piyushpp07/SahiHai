@@ -97,7 +97,9 @@ export const consultAssistant = async (req: Request, res: Response) => {
           replyLength: reply?.length,
         });
       } catch (groqError: any) {
-        logger.warn("llama-3.3-70b-versatile failed, trying fallback model", { error: groqError.message });
+        logger.warn("llama-3.3-70b-versatile failed, trying fallback model", {
+          error: groqError.message,
+        });
         try {
           // Fallback to mixtral if llama fails
           const fallbackCompletion = await groq.chat.completions.create({
@@ -117,7 +119,9 @@ export const consultAssistant = async (req: Request, res: Response) => {
           });
 
           reply = fallbackCompletion.choices[0]?.message?.content;
-          logger.info("✅ Groq API call successful with fallback model mixtral-8x7b-32768");
+          logger.info(
+            "✅ Groq API call successful with fallback model mixtral-8x7b-32768"
+          );
         } catch (fallbackError: any) {
           logger.error("❌ Both Groq models failed, falling back to OpenAI:", {
             message: fallbackError?.message,

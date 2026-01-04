@@ -68,9 +68,11 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       const prompt =
         'Extract items and prices from this bill. Return the data as a JSON object with \'items\' (an array of objects with \'name\' and \'price\' properties) and \'total\' (a number) properties. Example: { "items": [ { "name": "Item1", "price": 100 }, { "name": "Item2", "price": 200 } ], "total": 300 }';
       const imagePart = fileToGenerativePart(buffer, mimetype);
-      
+
       try {
-        logger.info("analyzeMedia: Attempting Gemini image analysis with gemini-1.5-flash");
+        logger.info(
+          "analyzeMedia: Attempting Gemini image analysis with gemini-1.5-flash"
+        );
         const result = await chat.sendMessage([prompt, imagePart]);
         const response = await result.response;
         geminiOutput = response.text();
@@ -79,10 +81,12 @@ export const analyzeMedia = async (req: Request, res: Response) => {
           length: geminiOutput.length,
         });
       } catch (geminiError: any) {
-        logger.error("❌ Gemini image analysis failed", { error: geminiError.message });
-        return res.status(500).json({ 
-          message: "Image analysis failed", 
-          error: geminiError.message 
+        logger.error("❌ Gemini image analysis failed", {
+          error: geminiError.message,
+        });
+        return res.status(500).json({
+          message: "Image analysis failed",
+          error: geminiError.message,
         });
       }
     } else if (mimetype.startsWith("audio/")) {
@@ -90,18 +94,22 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       const prompt =
         'Listen to this. If it\'s a mechanical noise, diagnose it. If it\'s a voice complaint, summarize the legal issue. Return the diagnosis/summary as a JSON object with a single property, \'analysis\', containing the string result. Example: { "analysis": "Engine knocking sound, likely bearing failure." } or { "analysis": "Customer complaining about faulty product, seeking refund." }';
       const audioPart = fileToGenerativePart(buffer, mimetype);
-      
+
       try {
-        logger.info("analyzeMedia: Attempting Gemini audio analysis with gemini-1.5-flash");
+        logger.info(
+          "analyzeMedia: Attempting Gemini audio analysis with gemini-1.5-flash"
+        );
         const result = await chat.sendMessage([prompt, audioPart]);
         const response = await result.response;
         geminiOutput = response.text();
         logger.info("✅ Gemini audio analysis successful");
       } catch (geminiError: any) {
-        logger.error("❌ Gemini audio analysis failed", { error: geminiError.message });
-        return res.status(500).json({ 
-          message: "Audio analysis failed", 
-          error: geminiError.message 
+        logger.error("❌ Gemini audio analysis failed", {
+          error: geminiError.message,
+        });
+        return res.status(500).json({
+          message: "Audio analysis failed",
+          error: geminiError.message,
         });
       }
     } else {
@@ -128,7 +136,9 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       )}. Please analyze them for overcharging.`;
 
       try {
-        logger.info("analyzeMedia: Attempting Groq analysis with llama-3.3-70b-versatile");
+        logger.info(
+          "analyzeMedia: Attempting Groq analysis with llama-3.3-70b-versatile"
+        );
         const groqChatCompletion = await groq.chat.completions.create({
           messages: [
             { role: "system", content: groqSystemPrompt },
@@ -143,7 +153,9 @@ export const analyzeMedia = async (req: Request, res: Response) => {
         );
         logger.info("✅ Groq analysis successful with llama-3.3-70b-versatile");
       } catch (groqError: any) {
-        logger.warn("llama-3.3-70b-versatile failed, trying fallback model", { error: groqError.message });
+        logger.warn("llama-3.3-70b-versatile failed, trying fallback model", {
+          error: groqError.message,
+        });
         try {
           // Fallback to mixtral if llama fails
           const fallbackCompletion = await groq.chat.completions.create({
@@ -158,13 +170,17 @@ export const analyzeMedia = async (req: Request, res: Response) => {
           groqAnalysis = JSON.parse(
             fallbackCompletion.choices[0]?.message?.content || "{}"
           );
-          logger.info("✅ Groq analysis successful with fallback model mixtral-8x7b-32768");
+          logger.info(
+            "✅ Groq analysis successful with fallback model mixtral-8x7b-32768"
+          );
         } catch (fallbackError: any) {
-          logger.error("Both Groq models failed", { error: fallbackError.message });
-          groqAnalysis = { 
+          logger.error("Both Groq models failed", {
+            error: fallbackError.message,
+          });
+          groqAnalysis = {
             summary: "Analysis unavailable due to model error",
-            fraudScore: 0, 
-            flaggedItems: [] 
+            fraudScore: 0,
+            flaggedItems: [],
           };
         }
       }
