@@ -50,7 +50,7 @@ export const draftLetter = async (req: Request, res: Response) => {
   try {
     // Step 1: Transcribe audio (Gemini)
     const audioPart = fileToGenerativePart(fileData, mimetype);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const transcriptPrompt =
       "Transcribe this audio. The user may speak in Hindi, English, or Hinglish.";
 
