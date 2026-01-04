@@ -40,14 +40,16 @@ export const analyzeMedia = async (req: Request, res: Response) => {
 
     if (mimetype.startsWith("image/")) {
       mediaType = "image";
-      const prompt = "Extract items and prices from this bill. Return the data as a JSON object with 'items' (an array of objects with 'name' and 'price' properties) and 'total' (a number) properties. Example: { \"items\": [ { \"name\": \"Item1\", \"price\": 100 }, { \"name\": \"Item2\", \"price\": 200 } ], \"total\": 300 }";
+      const prompt =
+        'Extract items and prices from this bill. Return the data as a JSON object with \'items\' (an array of objects with \'name\' and \'price\' properties) and \'total\' (a number) properties. Example: { "items": [ { "name": "Item1", "price": 100 }, { "name": "Item2", "price": 200 } ], "total": 300 }';
       const imagePart = fileToGenerativePart(buffer, mimetype);
       const result = await chat.sendMessage([prompt, imagePart]);
       const response = await result.response;
       geminiOutput = response.text();
     } else if (mimetype.startsWith("audio/")) {
       mediaType = "audio";
-      const prompt = "Listen to this. If it's a mechanical noise, diagnose it. If it's a voice complaint, summarize the legal issue. Return the diagnosis/summary as a JSON object with a single property, 'analysis', containing the string result. Example: { \"analysis\": \"Engine knocking sound, likely bearing failure.\" } or { \"analysis\": \"Customer complaining about faulty product, seeking refund.\" }";
+      const prompt =
+        'Listen to this. If it\'s a mechanical noise, diagnose it. If it\'s a voice complaint, summarize the legal issue. Return the diagnosis/summary as a JSON object with a single property, \'analysis\', containing the string result. Example: { "analysis": "Engine knocking sound, likely bearing failure." } or { "analysis": "Customer complaining about faulty product, seeking refund." }';
       const audioPart = fileToGenerativePart(buffer, mimetype);
       const result = await chat.sendMessage([prompt, audioPart]);
       const response = await result.response;
@@ -61,13 +63,21 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       parsedGeminiOutput = JSON.parse(geminiOutput);
     } catch (parseError) {
       console.error("Gemini output is not valid JSON:", geminiOutput);
-      return res.status(500).json({ message: "AI analysis failed to return valid JSON.", rawOutput: geminiOutput });
+      return res
+        .status(500)
+        .json({
+          message: "AI analysis failed to return valid JSON.",
+          rawOutput: geminiOutput,
+        });
     }
 
     let groqAnalysis = {};
     if (mediaType === "image" && parsedGeminiOutput.items) {
-      const groqSystemPrompt = "You are an Indian Market Expert. Your task is to analyze a list of items and their prices, and flag any item that appears to be overcharged by more than 15% compared to typical Delhi/Mumbai market rates. Provide a fraud score from 0-100 (0 being fair, 100 being extreme overcharge). Return a JSON object with 'summary' (a brief overall assessment), 'fraudScore' (number), and 'flaggedItems' (an array of items that are potentially overcharged, including their original name, price, and the reason for flagging).";
-      const groqUserMessage = `Here are the items extracted from a bill: ${JSON.stringify(parsedGeminiOutput.items)}. Please analyze them for overcharging.`;
+      const groqSystemPrompt =
+        "You are an Indian Market Expert. Your task is to analyze a list of items and their prices, and flag any item that appears to be overcharged by more than 15% compared to typical Delhi/Mumbai market rates. Provide a fraud score from 0-100 (0 being fair, 100 being extreme overcharge). Return a JSON object with 'summary' (a brief overall assessment), 'fraudScore' (number), and 'flaggedItems' (an array of items that are potentially overcharged, including their original name, price, and the reason for flagging).";
+      const groqUserMessage = `Here are the items extracted from a bill: ${JSON.stringify(
+        parsedGeminiOutput.items
+      )}. Please analyze them for overcharging.`;
 
       const groqChatCompletion = await groq.chat.completions.create({
         messages: [
@@ -78,15 +88,20 @@ export const analyzeMedia = async (req: Request, res: Response) => {
         temperature: 0.5,
         max_tokens: 1024,
       });
-      groqAnalysis = JSON.parse(groqChatCompletion.choices[0]?.message?.content || '{}');
+      groqAnalysis = JSON.parse(
+        groqChatCompletion.choices[0]?.message?.content || "{}"
+      );
     } else if (mediaType === "audio" && parsedGeminiOutput.analysis) {
-        // For audio analysis, Groq can further process Gemini's summary if needed.
-        // For MVP, we might just return Gemini's direct analysis or ask Groq to refine it.
-        // Let's assume for MVP, Gemini's audio analysis is sufficient and Groq is not strictly needed here for "price logic".
-        // If further action/legal advice is needed, that would be handled by chatController.
-        groqAnalysis = { summary: parsedGeminiOutput.analysis, fraudScore: 0, flaggedItems: [] }; // Placeholder for audio
+      // For audio analysis, Groq can further process Gemini's summary if needed.
+      // For MVP, we might just return Gemini's direct analysis or ask Groq to refine it.
+      // Let's assume for MVP, Gemini's audio analysis is sufficient and Groq is not strictly needed here for "price logic".
+      // If further action/legal advice is needed, that would be handled by chatController.
+      groqAnalysis = {
+        summary: parsedGeminiOutput.analysis,
+        fraudScore: 0,
+        flaggedItems: [],
+      }; // Placeholder for audio
     }
-
 
     res.status(200).json({
       mediaType,
@@ -96,6 +111,11 @@ export const analyzeMedia = async (req: Request, res: Response) => {
     });
   } catch (error: unknown) {
     console.error("Error during media analysis:", error);
-    res.status(500).json({ message: "Failed to analyze media.", error: (error instanceof Error) ? error.message : String(error) });
+    res
+      .status(500)
+      .json({
+        message: "Failed to analyze media.",
+        error: error instanceof Error ? error.message : String(error),
+      });
   }
 };

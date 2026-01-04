@@ -3,25 +3,28 @@
 ## ✅ Status: COMPLETE & WORKING
 
 **Backend URL**: https://sahi-hai-tau.vercel.app  
-**Repository**: github.com/piyushpp07/SahiHai  
+**Repository**: github.com/piyushpp07/SahiHai
 
 ---
 
 ## 📋 Quick Commands
 
 ### Run Frontend
+
 ```bash
 cd client
 npx expo start -c
 ```
 
 ### Run Backend Locally
+
 ```bash
 cd server
 npm run dev
 ```
 
 ### Deploy Backend to Vercel
+
 ```bash
 cd server
 npm run build
@@ -29,6 +32,7 @@ vercel --prod
 ```
 
 ### Update Vercel Environment Variables
+
 ```bash
 vercel env add GEMINI_API_KEY
 vercel env add GROQ_API_KEY
@@ -37,6 +41,7 @@ vercel --prod  # Redeploy
 ```
 
 ### Test API Endpoints
+
 ```bash
 # Health check
 curl https://sahi-hai-tau.vercel.app/
@@ -53,24 +58,24 @@ curl -X POST https://sahi-hai-tau.vercel.app/api/scam/check \
 
 ## 📚 Documentation Guide
 
-| Need | File | Location |
-|------|------|----------|
-| API endpoints & examples | `API_DOCS.md` | Root |
-| Deployment steps | `DEPLOYMENT_SUCCESS.md` | Root |
-| Fix 500 errors | `TROUBLESHOOTING_500.md` | Root |
-| Security setup | `CRITICAL_SECURITY.md` | Root |
-| What's done | `PROJECT_COMPLETE.md` | Root |
+| Need                     | File                     | Location |
+| ------------------------ | ------------------------ | -------- |
+| API endpoints & examples | `API_DOCS.md`            | Root     |
+| Deployment steps         | `DEPLOYMENT_SUCCESS.md`  | Root     |
+| Fix 500 errors           | `TROUBLESHOOTING_500.md` | Root     |
+| Security setup           | `CRITICAL_SECURITY.md`   | Root     |
+| What's done              | `PROJECT_COMPLETE.md`    | Root     |
 
 ---
 
 ## 🔧 Common Issues & Fixes
 
-| Problem | Solution |
-|---------|----------|
-| 500 error on `/api/scam/check` | Check MongoDB whitelist & API keys in Vercel |
-| Frontend can't reach backend | Verify `EXPO_PUBLIC_API_URL` in `client/.env.local` |
-| Build fails locally | Run `npm install` in both client & server |
-| MongoDB timeout | Whitelist Vercel IPs in MongoDB Atlas |
+| Problem                        | Solution                                            |
+| ------------------------------ | --------------------------------------------------- |
+| 500 error on `/api/scam/check` | Check MongoDB whitelist & API keys in Vercel        |
+| Frontend can't reach backend   | Verify `EXPO_PUBLIC_API_URL` in `client/.env.local` |
+| Build fails locally            | Run `npm install` in both client & server           |
+| MongoDB timeout                | Whitelist Vercel IPs in MongoDB Atlas               |
 
 ---
 

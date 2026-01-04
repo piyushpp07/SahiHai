@@ -1,7 +1,7 @@
-const { GoogleGenerativeAI } = require('@google/generative-ai');
-const Groq = require('groq-sdk');
-const fs = require('fs');
-const Scan = require('../models/Scan'); // Mongoose model (to be created)
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Groq = require("groq-sdk");
+const fs = require("fs");
+const Scan = require("../models/Scan"); // Mongoose model (to be created)
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
@@ -18,7 +18,7 @@ function fileToGenerativePart(path, mimeType) {
 
 const analyzeMedia = async (req, res) => {
   if (!req.file) {
-    return res.status(400).json({ error: 'No file uploaded.' });
+    return res.status(400).json({ error: "No file uploaded." });
   }
 
   const { path: filePath, mimetype } = req.file;
@@ -27,21 +27,25 @@ const analyzeMedia = async (req, res) => {
     let geminiResult;
     let groqAnalysis;
 
-    if (mimetype.startsWith('image/')) {
+    if (mimetype.startsWith("image/")) {
       const imagePart = fileToGenerativePart(filePath, mimetype);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = "Extract items/prices from this bill. Return JSON in the format: { items: [{ name: string, price: number }], total: number }. Ensure prices are numbers.";
-      
+      const prompt =
+        "Extract items/prices from this bill. Return JSON in the format: { items: [{ name: string, price: number }], total: number }. Ensure prices are numbers.";
+
       const result = await model.generateContent([prompt, imagePart]);
       const response = await result.response;
       geminiResult = response.text();
-      
+
       // Attempt to parse Gemini's output
       let parsedGeminiData;
       try {
         parsedGeminiData = JSON.parse(geminiResult);
       } catch (parseError) {
-        console.error("Failed to parse Gemini's image extraction output:", parseError);
+        console.error(
+          "Failed to parse Gemini's image extraction output:",
+          parseError
+        );
         console.error("Gemini raw output:", geminiResult);
         // Fallback or error handling if Gemini doesn't return perfect JSON
         parsedGeminiData = { items: [], total: 0, rawText: geminiResult };
@@ -75,27 +79,31 @@ const analyzeMedia = async (req, res) => {
         max_tokens: 1024,
       });
 
-      groqAnalysis = JSON.parse(groqChatCompletion.choices[0]?.message?.content || '{}');
-
-    } else if (mimetype.startsWith('audio/')) {
+      groqAnalysis = JSON.parse(
+        groqChatCompletion.choices[0]?.message?.content || "{}"
+      );
+    } else if (mimetype.startsWith("audio/")) {
       const audioPart = fileToGenerativePart(filePath, mimetype);
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      const prompt = "Listen to this audio. If it's a mechanical noise, diagnose it. If it's a voice complaint, summarize the legal issue. Return JSON in the format: { type: 'mechanical' | 'voice', analysis: string }. Ensure analysis is a detailed string.";
-      
+      const prompt =
+        "Listen to this audio. If it's a mechanical noise, diagnose it. If it's a voice complaint, summarize the legal issue. Return JSON in the format: { type: 'mechanical' | 'voice', analysis: string }. Ensure analysis is a detailed string.";
+
       const result = await model.generateContent([prompt, audioPart]);
       const response = await result.response;
       geminiResult = response.text();
-      
+
       try {
         groqAnalysis = JSON.parse(geminiResult); // Audio analysis from Gemini is the final output
       } catch (parseError) {
-        console.error("Failed to parse Gemini's audio analysis output:", parseError);
+        console.error(
+          "Failed to parse Gemini's audio analysis output:",
+          parseError
+        );
         groqAnalysis = { type: "unknown", analysis: geminiResult };
       }
-
     } else {
       fs.unlinkSync(filePath); // Delete the unsupported file
-      return res.status(400).json({ error: 'Unsupported file type.' });
+      return res.status(400).json({ error: "Unsupported file type." });
     }
 
     // Clean up the uploaded file
@@ -103,7 +111,7 @@ const analyzeMedia = async (req, res) => {
 
     // Save scan result to DB
     const newScan = new Scan({
-      fileType: mimetype.split('/')[0],
+      fileType: mimetype.split("/")[0],
       originalFileName: req.file.originalname,
       geminiResponse: geminiResult,
       groqResponse: groqAnalysis,
@@ -114,17 +122,18 @@ const analyzeMedia = async (req, res) => {
     await newScan.save();
 
     res.status(200).json({
-      message: 'Analysis complete',
+      message: "Analysis complete",
       scanId: newScan._id,
       analysis: groqAnalysis, // Send Groq analysis or Gemini analysis for audio
     });
-
   } catch (error) {
-    console.error('Error during media analysis:', error);
+    console.error("Error during media analysis:", error);
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath); // Clean up file on error
     }
-    res.status(500).json({ error: 'Failed to analyze media.', details: error.message });
+    res
+      .status(500)
+      .json({ error: "Failed to analyze media.", details: error.message });
   }
 };
 

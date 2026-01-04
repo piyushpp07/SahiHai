@@ -3,9 +3,11 @@
 ## 🔴 CRITICAL (Do First)
 
 ### 1. Regenerate All Exposed API Keys
+
 **Why?** Your credentials were exposed in chat and are now publicly visible.
 
 **Action Items:**
+
 - [ ] Generate new **Gemini API Key** at https://aistudio.google.com/app/apikeys
 - [ ] Generate new **Groq API Key** at https://console.groq.com/keys
 - [ ] Change **MongoDB Password** at https://cloud.mongodb.com
@@ -17,9 +19,11 @@
 ## 🟡 HIGH PRIORITY (Do Second)
 
 ### 2. Update Vercel Environment Variables
+
 **Why?** Backend needs the new credentials to work.
 
 **Command:**
+
 ```bash
 cd server
 vercel env add GEMINI_API_KEY
@@ -41,17 +45,20 @@ vercel --prod
 ## 🟢 NORMAL PRIORITY (Do Third)
 
 ### 3. Fix 500 Error on `/api/scam/check`
+
 **Symptoms:** Getting 500 when analyzing screenshots
 
 **Likely Cause:** Missing/invalid GEMINI_API_KEY on Vercel
 
 **Solution:** Complete items 1-2 above, then test:
+
 ```bash
 curl -X POST https://sahi-hai-tau.vercel.app/api/scam/check \
   -F "file=@screenshot.jpg"
 ```
 
 **Expected Response:**
+
 ```json
 {
   "isScam": false,
@@ -82,6 +89,7 @@ After completing all steps:
 ## 📚 Documentation
 
 For detailed steps, see:
+
 - **`CRITICAL_SECURITY.md`** - Complete security regeneration guide
 - **`TROUBLESHOOTING_500.md`** - Debug guide for 500 errors
 - **`DEPLOYMENT_SUCCESS.md`** - Backend deployment status
@@ -91,14 +99,14 @@ For detailed steps, see:
 
 ## 🚀 Current Status
 
-| Item | Status |
-|------|--------|
-| Backend deployed on Vercel | ✅ Working |
-| Frontend configured to use Vercel backend | ✅ Ready |
-| API endpoints corrected | ✅ Fixed |
-| API keys secured | ❌ **URGENT: Regenerate** |
-| Environment variables updated | ❌ **Pending keys** |
-| Scam detection working | ❌ **Waiting for keys** |
+| Item                                      | Status                    |
+| ----------------------------------------- | ------------------------- |
+| Backend deployed on Vercel                | ✅ Working                |
+| Frontend configured to use Vercel backend | ✅ Ready                  |
+| API endpoints corrected                   | ✅ Fixed                  |
+| API keys secured                          | ❌ **URGENT: Regenerate** |
+| Environment variables updated             | ❌ **Pending keys**       |
+| Scam detection working                    | ❌ **Waiting for keys**   |
 
 ---
 
