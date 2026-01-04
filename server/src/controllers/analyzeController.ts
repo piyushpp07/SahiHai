@@ -138,12 +138,12 @@ export const analyzeMedia = async (req: Request, res: Response) => {
   } catch (error: unknown) {
     logger.error("❌ Error during media analysis:", {
       message: error instanceof Error ? error.message : String(error),
-      stack: error instanceof Error ? error.stack?.split('\n')[0] : undefined
+      stack: error instanceof Error ? error.stack?.split("\n")[0] : undefined,
     });
     res.status(500).json({
       message: "Failed to analyze media.",
       error: error instanceof Error ? error.message : String(error),
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     });
   }
 };

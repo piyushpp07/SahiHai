@@ -67,21 +67,21 @@ if (isProduction) {
 const upload = multer({
   storage,
   fileFilter: (req, file, cb) => {
-    logger.debug("Multer fileFilter", { 
+    logger.debug("Multer fileFilter", {
       filename: file.originalname,
       mimetype: file.mimetype,
-      fieldname: file.fieldname
+      fieldname: file.fieldname,
     });
-    
+
     if (
       (file.mimetype.startsWith("image/") &&
         (file.mimetype.includes("jpeg") ||
           file.mimetype.includes("jpg") ||
           file.mimetype.includes("png"))) ||
       (file.mimetype.startsWith("audio/") &&
-        (file.mimetype.includes("mpeg") || 
-         file.mimetype.includes("mp4") ||
-         file.mimetype.includes("m4a")))
+        (file.mimetype.includes("mpeg") ||
+          file.mimetype.includes("mp4") ||
+          file.mimetype.includes("m4a")))
     ) {
       logger.debug("File accepted by filter");
       cb(null, true);
