@@ -10,7 +10,12 @@ import { getRecentScans } from "./controllers/scanController";
 import { consultAssistant } from "./controllers/chatController";
 import { getScanHistory, getScanStats } from "./controllers/historyController";
 import { checkScam } from "./controllers/scamController";
-import { draftLetter } from "./controllers/sarkariController";
+import {
+  draftLetter,
+  generateLetterPDF,
+  draftLetterFromText,
+} from "./controllers/sarkariController";
+import { connectToDatabase } from "./utils/dbConnect";
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -99,22 +104,10 @@ const upload = multer({
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 
-// Database Connection
-const MONGO_URI = process.env.MONGO_URI;
-
-if (MONGO_URI) {
-  logger.info("Attempting MongoDB connection...", {
-    uri: MONGO_URI.substring(0, 50) + "...",
-  });
-  mongoose
-    .connect(MONGO_URI)
-    .then(() => logger.info("✅ MongoDB connected successfully."))
-    .catch((err) => logger.error("❌ MongoDB connection error:", err));
-} else {
-  logger.warn(
-    "⚠️ MONGO_URI not found in .env file. Database features will be disabled."
-  );
-}
+// Initialize database connection (non-blocking for serverless)
+connectToDatabase().catch((err) => {
+  logger.error("Failed to initialize database connection:", err);
+});
 
 // Routes
 app.get("/", (req, res) => {
@@ -162,7 +155,7 @@ app.post(
   checkScam
 );
 
-// Sarkari Letter Draft Route
+// Sarkari Letter Draft Route (Audio)
 app.post(
   "/api/sarkari/draft",
   (req, res, next) => {
@@ -174,6 +167,30 @@ app.post(
   },
   upload.single("file"),
   draftLetter
+);
+
+// Sarkari Letter Draft Route (Text)
+app.post(
+  "/api/sarkari/draft-text",
+  (req, res, next) => {
+    logger.info("POST /api/sarkari/draft-text - Request received", {
+      complaintLength: req.body?.complaint?.length || 0,
+    });
+    next();
+  },
+  draftLetterFromText
+);
+
+// Sarkari PDF Generation Route
+app.post(
+  "/api/sarkari/generate-pdf",
+  (req, res, next) => {
+    logger.info("POST /api/sarkari/generate-pdf - Request received", {
+      letterLength: req.body?.letter?.length || 0,
+    });
+    next();
+  },
+  generateLetterPDF
 );
 
 // Recent Scans Route
