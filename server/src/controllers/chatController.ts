@@ -1,9 +1,14 @@
 import { Request, Response } from "express";
 import Groq from "groq-sdk";
 import OpenAI from "openai";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY || "");
+const geminiModel = genAI.getGenerativeModel({
+  model: "models/gemini-2.0-flash",
+});
 
 // Logger utility
 const logger = {
@@ -167,9 +172,30 @@ export const consultAssistant = async (req: Request, res: Response) => {
       logger.warn("OPENAI_API_KEY not configured, skipping OpenAI fallback");
     }
 
+    // Fallback to Gemini if both Groq and OpenAI fail or are not configured
+    if (!reply && process.env.GEMINI_KEY) {
+      try {
+        logger.info("Attempting Gemini API call (models/gemini-2.0-flash)");
+        const result = await geminiModel.generateContent(
+          `${systemPrompt}\n\nUser: ${userMessage}`
+        );
+        const response = await result.response;
+        reply = response.text();
+        logger.info("✅ Gemini API call successful", {
+          replyLength: reply?.length,
+        });
+      } catch (geminiError: any) {
+        logger.error("❌ Gemini API failed:", {
+          message: geminiError?.message,
+        });
+      }
+    } else if (!reply) {
+      logger.warn("GEMINI_KEY not configured, skipping Gemini fallback");
+    }
+
     if (!reply) {
       throw new Error(
-        "AI returned an empty response. Both Groq and OpenAI failed or are not configured."
+        "AI returned an empty response. Groq, OpenAI, and Gemini failed or are not configured."
       );
     }
 

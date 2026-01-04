@@ -76,12 +76,16 @@ export const analyzeMedia = async (req: Request, res: Response) => {
 
   try {
     if (mimetype.startsWith("image/")) {
-      const base64Image = `data:${mimetype};base64,${buffer.toString("base64")}`;
-      
+      const base64Image = `data:${mimetype};base64,${buffer.toString(
+        "base64"
+      )}`;
+
       // Step 1: Try Groq (Primary)
       try {
-        logger.info("analyzeMedia: Attempting Primary Analysis with Groq (llama-3.2-11b-vision-preview)");
-        
+        logger.info(
+          "analyzeMedia: Attempting Primary Analysis with Groq (llama-3.2-11b-vision-preview)"
+        );
+
         const chatCompletion = await groq.chat.completions.create({
           messages: [
             {
@@ -111,55 +115,70 @@ export const analyzeMedia = async (req: Request, res: Response) => {
         } else {
           throw new Error("Empty response from Groq");
         }
-
       } catch (groqError: any) {
-        logger.warn("⚠️ Groq analysis failed, switching to fallback", { error: groqError.message });
-        
+        logger.warn("⚠️ Groq analysis failed, switching to fallback", {
+          error: groqError.message,
+        });
+
         // Step 2: Fallback to Gemini
         try {
-          logger.info("analyzeMedia: Attempting Backup Analysis with Gemini (models/gemini-2.0-flash)");
-          
+          logger.info(
+            "analyzeMedia: Attempting Backup Analysis with Gemini (models/gemini-2.0-flash)"
+          );
+
           const imagePart = fileToGenerativePart(buffer, mimetype);
-          const result = await geminiModel.generateContent([systemPrompt, imagePart]);
+          const result = await geminiModel.generateContent([
+            systemPrompt,
+            imagePart,
+          ]);
           const response = await result.response;
           const text = response.text();
-          
+
           // Clean up markdown code blocks if present
           const cleanText = text.replace(/```json\n?|\n?```/g, "").trim();
-          
+
           analysisResult = JSON.parse(cleanText);
           usedModel = "Gemini (models/gemini-2.0-flash)";
           logger.info("✅ Gemini analysis successful");
-          
         } catch (geminiError: any) {
-          logger.error("❌ Both Primary and Backup models failed", { error: geminiError.message });
+          logger.error("❌ Both Primary and Backup models failed", {
+            error: geminiError.message,
+          });
           return res.status(500).json({
             message: "Analysis failed on both primary and backup services.",
-            error: geminiError.message
+            error: geminiError.message,
           });
         }
       }
     } else if (mimetype.startsWith("audio/")) {
-       // Audio handling - Gemini only
-       try {
-         logger.info("analyzeMedia: Processing audio with Gemini");
-         const audioPart = fileToGenerativePart(buffer, mimetype);
-         const prompt = 'Listen to this. If it\'s a mechanical noise, diagnose it. If it\'s a voice complaint, summarize the legal issue. Return JSON: { "summary": "string", "scam_score": 0, "items": [], "total": 0 }';
-         
-         const result = await geminiModel.generateContent([prompt, audioPart]);
-         const response = await result.response;
-         const text = response.text();
-         const cleanText = text.replace(/```json\n?|\n?```/g, "").trim();
-         
-         analysisResult = JSON.parse(cleanText);
-         usedModel = "Gemini (Audio)";
-         logger.info("✅ Gemini audio analysis successful");
-       } catch (e: any) {
-          logger.error("❌ Audio analysis failed", { error: e.message });
-          return res.status(500).json({ message: "Audio analysis failed", error: e.message });
-       }
+      // Audio handling - Gemini only
+      try {
+        logger.info("analyzeMedia: Processing audio with Gemini");
+        const audioPart = fileToGenerativePart(buffer, mimetype);
+        const prompt =
+          'Listen to this. If it\'s a mechanical noise, diagnose it. If it\'s a voice complaint, summarize the legal issue. Return JSON: { "summary": "string", "scam_score": 0, "items": [], "total": 0 }';
+
+        const result = await geminiModel.generateContent([prompt, audioPart]);
+        const response = await result.response;
+        const text = response.text();
+        const cleanText = text.replace(/```json\n?|\n?```/g, "").trim();
+
+        analysisResult = JSON.parse(cleanText);
+        usedModel = "Gemini (Audio)";
+        logger.info("✅ Gemini audio analysis successful");
+      } catch (e: any) {
+        logger.error("❌ Audio analysis failed", { error: e.message });
+        return res
+          .status(500)
+          .json({ message: "Audio analysis failed", error: e.message });
+      }
     } else {
-      return res.status(400).json({ message: "Unsupported file type. Only images and audio are supported." });
+      return res
+        .status(400)
+        .json({
+          message:
+            "Unsupported file type. Only images and audio are supported.",
+        });
     }
 
     // Step 3: Standardize Response
@@ -169,11 +188,10 @@ export const analyzeMedia = async (req: Request, res: Response) => {
       scam_score: analysisResult?.scam_score || 0,
       summary: analysisResult?.summary || "No summary provided",
       usedModel,
-      mediaType: mimetype.startsWith("image/") ? "image" : "audio"
+      mediaType: mimetype.startsWith("image/") ? "image" : "audio",
     };
 
     res.status(200).json(finalResult);
-
   } catch (error: unknown) {
     logger.error("❌ Error during media analysis:", {
       message: error instanceof Error ? error.message : String(error),

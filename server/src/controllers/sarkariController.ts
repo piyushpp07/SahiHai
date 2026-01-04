@@ -48,7 +48,7 @@ export const draftLetter = async (req: Request, res: Response) => {
   const fileData = file.path || file.buffer;
 
   try {
-    // Step 1: Transcribe audio (Gemini)
+    // Step 1: Transcribe audio (Gemini Primary -> Groq Whisper Backup)
     const audioPart = fileToGenerativePart(fileData, mimetype);
     const model = genAI.getGenerativeModel({
       model: "models/gemini-2.0-flash",
@@ -68,11 +68,33 @@ export const draftLetter = async (req: Request, res: Response) => {
       transcript = (await transcriptResult.response).text();
       logger.info("✅ Gemini transcription successful");
     } catch (geminiError: any) {
-      logger.error("❌ Gemini transcription failed", {
+      logger.warn("⚠️ Gemini transcription failed, switching to Groq Whisper", {
         error: geminiError.message,
       });
-      transcript =
-        "Audio transcription failed. Please provide your complaint in text format.";
+
+      try {
+        // Fallback to Groq Whisper
+        // Note: Groq requires a file stream or buffer for audio
+        if (file.path && fs.existsSync(file.path)) {
+          const transcription = await groq.audio.transcriptions.create({
+            file: fs.createReadStream(file.path),
+            model: "whisper-large-v3",
+            response_format: "text",
+            language: "en", // Or auto-detect if supported/omitted, but 'en' or 'hi' might be needed. Whisper v3 is good at multi-lingual.
+            // prompt: "The user may speak in Hindi, English, or Hinglish." // Optional prompt
+          });
+          transcript = transcription as unknown as string; // response_format: 'text' returns string
+          logger.info("✅ Groq Whisper transcription successful");
+        } else {
+          throw new Error("File path required for Groq Whisper");
+        }
+      } catch (groqError: any) {
+        logger.error("❌ Both Gemini and Groq transcription failed", {
+          error: groqError.message,
+        });
+        transcript =
+          "Audio transcription failed. Please provide your complaint in text format.";
+      }
     }
 
     // Step 2: Draft legal letter (Groq with fallback)
@@ -110,10 +132,20 @@ export const draftLetter = async (req: Request, res: Response) => {
           "✅ Groq letter drafting successful with fallback model mixtral-8x7b-32768"
         );
       } catch (fallbackError: any) {
-        logger.error("Both Groq models failed for letter drafting", {
+        logger.warn("Both Groq models failed, trying Gemini fallback", {
           error: fallbackError.message,
         });
-        letter = `Dear Sir/Madam,
+
+        try {
+          // Fallback to Gemini
+          const geminiResult = await model.generateContent(groqPrompt);
+          letter = (await geminiResult.response).text();
+          logger.info("✅ Gemini letter drafting successful");
+        } catch (geminiDraftError: any) {
+          logger.error("All AI models failed for letter drafting", {
+            error: geminiDraftError.message,
+          });
+          letter = `Dear Sir/Madam,
 
 I am writing to formally lodge a complaint regarding: ${transcript}
 
@@ -125,6 +157,7 @@ Sincerely,
 [Your Name]
 
 (Note: This is a basic template as AI drafting services are temporarily unavailable)`;
+        }
       }
     }
 

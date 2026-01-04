@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import fs from "fs";
 
 // Logger utility
@@ -14,7 +15,14 @@ const logger = {
     console.log(`[DEBUG] ${new Date().toISOString()} - ${msg}`, data || ""),
 };
 
+// Initialize Gemini (Backup)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY || "");
+const geminiModel = genAI.getGenerativeModel({
+  model: "models/gemini-2.0-flash",
+});
+
+// Initialize Groq (Primary)
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY as string });
 
 function fileToGenerativePart(pathOrBuffer: string | Buffer, mimeType: string) {
   let data: string;
@@ -66,68 +74,103 @@ export const checkScam = async (req: Request, res: Response) => {
     hasGeminiKey: !!process.env.GEMINI_API_KEY,
   });
 
+  const prompt =
+    "Analyze this screenshot. Look for keywords like 'Part-time job', 'KYC Update', 'Lottery', or suspicious URLs. Identify if this matches common Indian cyber fraud patterns. Return JSON: { isScam: boolean, riskLevel: 'High'|'Medium'|'Low', reason: string }.";
+
+  let resultData: any = null;
+
   try {
-    logger.debug("checkScam: Converting file to generative part");
-    const imagePart = fileToGenerativePart(fileData, mimetype);
-
-    logger.debug("checkScam: Getting Gemini model");
-    const model = genAI.getGenerativeModel({
-      model: "models/gemini-2.0-flash",
-    });
-
-    const prompt =
-      "Analyze this screenshot. Look for keywords like 'Part-time job', 'KYC Update', 'Lottery', or suspicious URLs. Identify if this matches common Indian cyber fraud patterns. Return JSON: { isScam: boolean, riskLevel: 'High'|'Medium'|'Low', reason: string }.";
-
-    logger.info("checkScam: Calling Gemini API with models/gemini-2.0-flash");
-
-    let result;
+    // Step 1: Try Groq (Primary)
     try {
-      result = await model.generateContent([prompt, imagePart]);
-      logger.info("✅ Gemini API call successful");
-    } catch (geminiError: any) {
-      logger.error("❌ Gemini API call failed", { error: geminiError.message });
-      // For scam detection, we don't have a good fallback since it requires image analysis
-      // Return a safe default response
-      return res.status(500).json({
-        error: "Scam detection temporarily unavailable",
-        details: geminiError.message,
-        fallbackResponse: {
-          isScam: false,
-          riskLevel: "Unknown",
-          reason:
-            "Unable to analyze due to AI service error. Please manually verify any suspicious content.",
-        },
-      });
-    }
-    const response = await result.response;
+      logger.info(
+        "checkScam: Attempting Primary Analysis with Groq (llama-3.2-11b-vision-preview)"
+      );
 
-    logger.debug("checkScam: Parsing AI response");
-    let scamResult;
-    try {
-      scamResult = JSON.parse(response.text());
-      logger.info("✅ checkScam: Successfully parsed response", {
-        isScam: scamResult.isScam,
-        riskLevel: scamResult.riskLevel,
+      let base64Image: string;
+      if (typeof fileData === "string") {
+        base64Image = `data:${mimetype};base64,${Buffer.from(
+          fs.readFileSync(fileData)
+        ).toString("base64")}`;
+      } else {
+        base64Image = `data:${mimetype};base64,${(fileData as Buffer).toString(
+          "base64"
+        )}`;
+      }
+
+      const chatCompletion = await groq.chat.completions.create({
+        messages: [
+          {
+            role: "user",
+            content: [
+              { type: "text", text: prompt },
+              {
+                type: "image_url",
+                image_url: {
+                  url: base64Image,
+                },
+              },
+            ] as any,
+          },
+        ],
+        model: "llama-3.2-11b-vision-preview",
+        temperature: 0.1,
+        max_tokens: 1024,
+        response_format: { type: "json_object" },
       });
-    } catch (e) {
-      logger.warn("checkScam: Could not parse JSON response, using default", {
-        rawResponse: response.text().substring(0, 100),
+
+      const content = chatCompletion.choices[0]?.message?.content;
+      if (content) {
+        resultData = JSON.parse(content);
+        logger.info("✅ Groq analysis successful");
+      } else {
+        throw new Error("Empty response from Groq");
+      }
+    } catch (groqError: any) {
+      logger.warn("⚠️ Groq analysis failed, switching to fallback", {
+        error: groqError.message,
       });
-      scamResult = {
-        isScam: false,
-        riskLevel: "Low",
-        reason: "Could not parse AI response.",
-      };
+
+      // Step 2: Fallback to Gemini
+      try {
+        logger.debug("checkScam: Converting file to generative part");
+        const imagePart = fileToGenerativePart(fileData, mimetype);
+
+        logger.info(
+          "checkScam: Calling Gemini API with models/gemini-2.0-flash"
+        );
+        const result = await geminiModel.generateContent([prompt, imagePart]);
+        const response = await result.response;
+        const text = response.text();
+
+        // Clean up markdown code blocks if present
+        const cleanText = text.replace(/```json\n?|\n?```/g, "").trim();
+        resultData = JSON.parse(cleanText);
+        logger.info("✅ Gemini API call successful");
+      } catch (geminiError: any) {
+        logger.error("❌ Both Primary and Backup models failed", {
+          error: geminiError.message,
+        });
+        return res.status(500).json({
+          error: "Scam detection temporarily unavailable",
+          details: geminiError.message,
+          fallbackResponse: {
+            isScam: false,
+            riskLevel: "Unknown",
+            reason:
+              "Unable to analyze due to AI service error. Please manually verify any suspicious content.",
+          },
+        });
+      }
     }
 
-    // Only delete file if it's a file path (not in-memory)
-    if (file.path && fs.existsSync(file.path)) {
-      logger.debug("checkScam: Deleting temporary file", { path: file.path });
-      fs.unlinkSync(file.path);
+    // Return the result
+    if (resultData) {
+      // Clean up file if it was saved to disk
+      if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+        fs.unlinkSync(req.file.path);
+      }
+      res.json(resultData);
     }
-
-    logger.info("✅ checkScam: Analysis complete");
-    res.status(200).json(scamResult);
   } catch (error: any) {
     logger.error("❌ checkScam: Error during analysis", {
       message: error?.message,
