@@ -1,7 +1,9 @@
 import { Request, Response } from "express";
 import Groq from "groq-sdk";
+import OpenAI from "openai";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 interface ScanContext {
   fraudScore?: number;
@@ -17,8 +19,8 @@ const getSystemPrompt = (
   Your goal is to empower the user to handle disputes over unfair billing.
   
   You have the following context about a bill the user just scanned:
-  - Fraud Score: ${scanContext.fraudScore || 'N/A'}/100
-  - AI Summary: "${scanContext.summary || 'No summary available.'}"
+  - Fraud Score: ${scanContext.fraudScore || "N/A"}/100
+  - AI Summary: "${scanContext.summary || "No summary available."}"
   - Flagged Items: ${JSON.stringify(scanContext.flaggedItems || [], null, 2)}
 
   The user is now asking for your help with the following question: "${userMessage}"
@@ -36,7 +38,10 @@ const getSystemPrompt = (
 };
 
 export const consultAssistant = async (req: Request, res: Response) => {
-  const { userMessage, scanContext }: { userMessage: string; scanContext: ScanContext } = req.body;
+  const {
+    userMessage,
+    scanContext,
+  }: { userMessage: string; scanContext: ScanContext } = req.body;
 
   if (!userMessage || !scanContext) {
     return res.status(400).json({
@@ -47,31 +52,63 @@ export const consultAssistant = async (req: Request, res: Response) => {
   try {
     const systemPrompt = getSystemPrompt(scanContext, userMessage);
 
-    const chatCompletion = await groq.chat.completions.create({
-      messages: [
-        {
-          role: "system",
-          content: systemPrompt,
-        },
-        {
-          role: "user",
-          content: userMessage,
-        },
-      ],
-      model: "mixtral-8x7b-32768",
-      temperature: 0.5,
-      max_tokens: 512,
-    });
+    let reply: string | undefined;
 
-    const reply = chatCompletion.choices[0]?.message?.content;
+    // Try Groq first
+    if (process.env.GROQ_API_KEY) {
+      try {
+        const chatCompletion = await groq.chat.completions.create({
+          messages: [
+            {
+              role: "system",
+              content: systemPrompt,
+            },
+            {
+              role: "user",
+              content: userMessage,
+            },
+          ],
+          model: "mixtral-8x7b-32768",
+          temperature: 0.5,
+          max_tokens: 512,
+        });
+
+        reply = chatCompletion.choices[0]?.message?.content;
+      } catch (groqError) {
+        console.warn("Groq API failed, falling back to OpenAI:", groqError);
+      }
+    }
+
+    // Fallback to OpenAI if Groq fails or is not configured
+    if (!reply && process.env.OPENAI_API_KEY) {
+      const chatCompletion = await openai.chat.completions.create({
+        model: "gpt-3.5-turbo",
+        messages: [
+          {
+            role: "system",
+            content: systemPrompt,
+          },
+          {
+            role: "user",
+            content: userMessage,
+          },
+        ],
+        temperature: 0.5,
+        max_tokens: 512,
+      });
+
+      reply = chatCompletion.choices[0]?.message?.content || undefined;
+    }
 
     if (!reply) {
-      throw new Error("AI returned an empty response.");
+      throw new Error(
+        "AI returned an empty response. Both Groq and OpenAI failed or are not configured."
+      );
     }
 
     res.status(200).json({ reply });
   } catch (error) {
-    console.error("Error during assistant consultation with Groq:", error);
+    console.error("Error during assistant consultation:", error);
     res
       .status(500)
       .json({ message: "Failed to get a response from the assistant." });
