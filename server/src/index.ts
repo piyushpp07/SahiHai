@@ -115,9 +115,11 @@ app.get("/api/scans", (req, res) => {
 app.get("/api/scans/history", getScanHistory);
 app.get("/api/scans/stats", getScanStats);
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
+// Start Server (only in non-serverless environments)
+if (process.env.NODE_ENV !== "production" || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`Server is running on http://localhost:${PORT}`);
+  });
+}
 
 export default app;
