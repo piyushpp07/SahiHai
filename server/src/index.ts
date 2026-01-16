@@ -22,6 +22,8 @@ import {
   updateProfile,
   changePassword,
 } from "./controllers/authController";
+import { getTijoriItems, addTijoriItem } from './controllers/tijoriController';
+import { checkChallan } from './controllers/challanController';
 import { authMiddleware } from "./middleware/authMiddleware";
 import { connectToDatabase } from "./utils/dbConnect";
 
@@ -176,6 +178,41 @@ app.post(
   },
   authMiddleware,
   changePassword
+);
+
+// ======================
+// Tijori (Warranty Vault) Routes
+// ======================
+app.get(
+  "/api/tijori/items",
+  (req, res, next) => {
+    logger.info("GET /api/tijori/items - Request received");
+    next();
+  },
+  authMiddleware,
+  getTijoriItems
+);
+
+app.post(
+  "/api/tijori/items",
+  (req, res, next) => {
+    logger.info("POST /api/tijori/items - Request received");
+    next();
+  },
+  authMiddleware,
+  addTijoriItem
+);
+
+// ======================
+// RTO Challan Routes
+// ======================
+app.post(
+  "/api/challan/check",
+  (req, res, next) => {
+    logger.info("POST /api/challan/check - Request received", { vehicleNumber: req.body?.vehicleNumber });
+    next();
+  },
+  checkChallan
 );
 
 // ======================

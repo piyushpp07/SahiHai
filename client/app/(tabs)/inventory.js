@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import api from "../utils/api";
-import ModernHeader from "../components/ModernHeader";
 import {
   COLORS,
   SHADOWS,
@@ -123,7 +122,6 @@ export default function InventoryTab() {
 
   return (
     <View style={styles.wrapper}>
-      <ModernHeader title="Inventory" subtitle="Manage your appliances" />
       <View style={styles.container}>
         <ScrollView
           style={{ flex: 1 }}

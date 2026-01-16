@@ -1,93 +1,53 @@
-// Modern color palette for SahiHai app
-export const COLORS = {
-  // Primary
-  ACCENT: "#1976d2",
-  ACCENT_LIGHT: "#42a5f5",
-  ACCENT_DARK: "#1565c0",
+// constants/colors.js
 
-  // Secondary
-  SUCCESS: "#00b894",
-  DANGER: "#e17055",
-  WARNING: "#fdcb6e",
-  INFO: "#74b9ff",
-
-  // Neutral
-  WHITE: "#ffffff",
-  BLACK: "#000000",
-  GRAY_LIGHT: "#f5f5f5",
-  GRAY_MEDIUM: "#e0e0e0",
-  GRAY_DARK: "#636e72",
-  GRAY_DARKER: "#2d3436",
-
-  // Backgrounds
-  BG_PRIMARY: "#ffffff",
-  BG_SECONDARY: "#f8f9fa",
-
-  // Text
-  TEXT_PRIMARY: "#2d3436",
-  TEXT_SECONDARY: "#636e72",
-  TEXT_LIGHT: "#b2bec3",
+const commonColors = {
+  white: '#FFFFFF',
+  black: '#000000',
+  grey: '#A9A9A9',
 };
 
-export const SHADOWS = {
-  sm: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  md: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.08,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  lg: {
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 6,
-  },
+export const LIGHT_COLORS = {
+  ...commonColors,
+  primary: '#5D3FD3', // Royal Purple
+  secondary: '#FF9F1C', // Alert Orange
+  success: '#00C851', // Whatsapp Green
+  surface: '#FFFFFF', // Cards
+  background: '#F4F6F8', // Light Gray Background
+  textPrimary: '#1A1A1A',
+  textSecondary: '#6C757D',
+  error: '#D32F2F',
+  // Theme-specific names from original ThemeContext
+  BG_PRIMARY: '#F4F6F8',
+  BG_SECONDARY: '#FFFFFF',
+  TEXT_PRIMARY: '#1A1A1A',
+  TEXT_SECONDARY: '#6C757D',
+  ACCENT: '#5D3FD3',
+  ERROR: '#D32F2F',
+  SUCCESS: '#00C851',
+  WARNING: '#FF9F1C',
+  BORDER: '#E0E0E0',
+  CARD: '#FFFFFF',
 };
 
-export const SPACING = {
-  xs: 4,
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  xxl: 24,
-  xxxl: 32,
+export const DARK_COLORS = {
+  ...commonColors,
+  primary: '#7B5FFC', // Lighter Royal Purple for dark mode
+  secondary: '#FFB84D', // Lighter Alert Orange
+  success: '#00E676', // Lighter Green
+  surface: '#1E1E1E', // Darker surface for cards
+  background: '#121212', // Standard dark mode background
+  textPrimary: '#FFFFFF',
+  textSecondary: '#B0B0B0',
+  error: '#EF5350', // Lighter Red
+  // Theme-specific names from original ThemeContext
+  BG_PRIMARY: '#121212',
+  BG_SECONDARY: '#1E1E1E',
+  TEXT_PRIMARY: '#FFFFFF',
+  TEXT_SECONDARY: '#B0B0B0',
+  ACCENT: '#7B5FFC',
+  ERROR: '#EF5350',
+  SUCCESS: '#00E676',
+  WARNING: '#FFB84D',
+  BORDER: '#333333',
+  CARD: '#1E1E1E',
 };
-
-export const BORDER_RADIUS = {
-  sm: 8,
-  md: 12,
-  lg: 16,
-  xl: 20,
-  full: 9999,
-};
-
-export const FONT_SIZES = {
-  xs: 12,
-  sm: 14,
-  md: 16,
-  lg: 18,
-  xl: 20,
-  xxl: 24,
-  xxxl: 28,
-};
-
-export const FONT_WEIGHTS = {
-  light: "300",
-  regular: "400",
-  medium: "500",
-  semibold: "600",
-  bold: "700",
-};
-
-// Default export for the module
-export default COLORS;

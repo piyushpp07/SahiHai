@@ -11,20 +11,36 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import api from "../utils/api";
 import { useRouter } from "expo-router";
-import ModernHeader from "../components/ModernHeader";
-import {
-  COLORS,
-  SHADOWS,
-  SPACING,
-  BORDER_RADIUS,
-  FONT_SIZES,
-} from "../constants/colors";
+import { useTheme } from "../context/ThemeContext";
+
+// This is the new widget component
+const MohallaRateWidget = ({ colors }) => (
+  <View style={[styles.mohallaCard, { backgroundColor: colors.primary, shadowColor: colors.black }]}>
+    <View style={styles.mohallaHeader}>
+      <Text style={[styles.mohallaTitle, { color: colors.white }]}>Trending in Your Area</Text>
+    </View>
+    <View style={styles.mohallaBody}>
+      <Text style={[styles.mohallaText, { color: colors.white }]}>
+        People in <Text style={{fontWeight: 'bold'}}>Koramangala</Text> are paying
+      </Text>
+      <View style={styles.mohallaPriceContainer}>
+        <Text style={[styles.mohallaPrice, { color: colors.secondary }]}>
+          ₹350
+        </Text>
+        <Text style={[styles.mohallaService, { color: colors.white }]}>
+          for Split AC Service today.
+        </Text>
+      </View>
+    </View>
+  </View>
+);
 
 export default function HomeTab() {
   const [recentScans, setRecentScans] = useState([]);
   const [totalSaved, setTotalSaved] = useState(0);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
+  const { colors } = useTheme();
 
   useEffect(() => {
     fetchData();
@@ -33,16 +49,12 @@ export default function HomeTab() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      // Try to fetch from API, but provide fallback data
-      try {
-        const res = await api.get("/api/scans");
-        setRecentScans(res.data?.scans || []);
-        setTotalSaved(res.data?.totalSaved || 0);
-      } catch (_apiError) {
-        // If API fails, use empty/default state
-        setRecentScans([]);
-        setTotalSaved(0);
-      }
+      // Mock data for demonstration
+      setRecentScans([
+        {_id: '1', title: 'LG AC Scan', type: 'image', savings: 150},
+        {_id: '2', title: 'Samsung TV Check', type: 'audio', savings: 0},
+      ]);
+      setTotalSaved(1500);
     } finally {
       setLoading(false);
     }
@@ -50,64 +62,73 @@ export default function HomeTab() {
 
   const features = [
     {
-      id: "scan",
-      icon: "scan-circle",
-      title: "Scan Appliance",
-      description: "Detect appliance age and model",
-      color: COLORS.ACCENT,
-      route: "/scan",
+      id: "tijori",
+      icon: "lock-closed",
+      title: "The Tijori",
+      description: "Secure your bills & warranties",
+      colorKey: "primary",
+      route: "/tijori",
+    },
+    {
+      id: "challan",
+      icon: "car-sport",
+      title: "RTO Challan",
+      description: "Check traffic fines",
+      colorKey: "error",
+      route: "/features/challan",
     },
     {
       id: "inventory",
       icon: "cube",
       title: "Inventory",
       description: "Manage your appliances",
-      color: COLORS.SUCCESS,
+      colorKey: "success",
       route: "/inventory",
     },
     {
-      id: "scam",
-      icon: "alert-circle",
-      title: "Scam Scanner",
-      description: "Check for scam indicators",
-      color: COLORS.DANGER,
-      route: "/scam",
-    },
-    {
-      id: "sarkari",
-      icon: "document-text",
-      title: "Sarkari Saathi",
-      description: "Draft official letters",
-      color: COLORS.WARNING,
-      route: "/sarkari",
+      id: "scan",
+      icon: "scan-circle",
+      title: "Scan Appliance",
+      description: "Detect appliance age",
+      colorKey: "secondary",
+      route: "/scan",
     },
   ];
 
   const renderFeatureCard = ({ item }) => (
     <TouchableOpacity
-      style={[styles.featureCard, SHADOWS.md]}
+      style={[
+        styles.featureCard,
+        { backgroundColor: colors.surface, shadowColor: colors.black },
+      ]}
       onPress={() => router.push(item.route)}
       activeOpacity={0.7}
     >
       <View
         style={[
           styles.featureIconContainer,
-          { backgroundColor: `${item.color}15` },
+          { backgroundColor: `${colors[item.colorKey]}1A` },
         ]}
       >
-        <Ionicons name={item.icon} size={32} color={item.color} />
+        <Ionicons name={item.icon} size={28} color={colors[item.colorKey]} />
       </View>
       <View style={styles.featureContent}>
-        <Text style={styles.featureTitle}>{item.title}</Text>
-        <Text style={styles.featureDescription}>{item.description}</Text>
+        <Text style={[styles.featureTitle, { color: colors.textPrimary }]}>
+          {item.title}
+        </Text>
+        <Text
+          style={[styles.featureDescription, { color: colors.textSecondary }]}
+        >
+          {item.description}
+        </Text>
       </View>
-      <Ionicons name="chevron-forward" size={20} color={COLORS.TEXT_LIGHT} />
+      <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
     </TouchableOpacity>
   );
 
   const renderRecentScan = ({ item }) => (
     <TouchableOpacity
-      style={[styles.scanCard, SHADOWS.sm]}
+      style={[styles.scanCard, { backgroundColor: colors.surface, shadowColor: colors.black }]}
       onPress={() => router.push(`/result/${item._id}`)}
       activeOpacity={0.7}
     >
@@ -117,134 +138,96 @@ export default function HomeTab() {
           {
             backgroundColor:
               item.type === "image"
-                ? `${COLORS.ACCENT}15`
-                : `${COLORS.SUCCESS}15`,
+                ? `${colors.primary}1A`
+                : `${colors.success}1A`,
           },
         ]}
       >
         <Ionicons
           name={item.type === "image" ? "document" : "mic"}
           size={24}
-          color={item.type === "image" ? COLORS.ACCENT : COLORS.SUCCESS}
+          color={item.type === "image" ? colors.primary : colors.success}
         />
       </View>
       <View style={styles.scanInfo}>
-        <Text style={styles.scanTitle}>{item.title || "Scan Result"}</Text>
-        <Text style={styles.scanTime}>Just now</Text>
+        <Text style={[styles.scanTitle, { color: colors.textPrimary }]}>
+          {item.title || "Scan Result"}
+        </Text>
+        <Text style={[styles.scanTime, { color: colors.textSecondary }]}>
+          Just now
+        </Text>
       </View>
-      <View style={styles.savingsBadge}>
-        <Text style={styles.savingsText}>₹{item.savings || 0}</Text>
+      <View
+        style={[
+          styles.savingsBadge,
+          { backgroundColor: `${colors.success}20` },
+        ]}
+      >
+        <Text style={[styles.savingsText, { color: colors.success }]}>
+          ₹{item.savings || 0}
+        </Text>
       </View>
     </TouchableOpacity>
   );
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={COLORS.ACCENT} />
+      <View
+        style={[
+          styles.loadingContainer,
+          { backgroundColor: colors.background },
+        ]}
+      >
+        <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
   }
 
   return (
-    <View style={styles.wrapper}>
-      <ModernHeader title="SahiHai" subtitle="Your digital rights assistant" />
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Stats Card */}
-        <View style={[styles.statsCard, SHADOWS.lg]}>
-          <View style={styles.statsContent}>
-            <Ionicons name="wallet" size={32} color={COLORS.ACCENT} />
-            <View style={styles.statsTextContainer}>
-              <Text style={styles.statsLabel}>Total Savings</Text>
-              <Text style={styles.statsValue}>₹{totalSaved}</Text>
-            </View>
+    <View style={[styles.wrapper, { backgroundColor: colors.background }]}>
+      <ScrollView
+        style={[styles.container, { backgroundColor: colors.background }]}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{paddingBottom: 32}}
+      >
+        {/* Mohalla Rate Widget */}
+        <MohallaRateWidget colors={colors} />
+        
+        {/* Features Grid */}
+        <View style={styles.section}>
+          <Text style={[styles.sectionTitle, { color: colors.textPrimary }]}>
+            What would you like to do?
+          </Text>
+          <View style={styles.featuresGrid}>
+            {features.map(item => (
+              <TouchableOpacity
+                key={item.id}
+                style={[styles.gridItem, { backgroundColor: colors.surface, shadowColor: colors.black }]}
+                onPress={() => router.push(item.route)}
+              >
+                <Ionicons name={item.icon} size={28} color={colors[item.colorKey]} />
+                <Text style={[styles.gridItemText, {color: colors.textPrimary}]}>{item.title}</Text>
+              </TouchableOpacity>
+            ))}
           </View>
         </View>
 
-        {/* Features Grid */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Access</Text>
-          <FlatList
-            data={features}
-            renderItem={renderFeatureCard}
-            keyExtractor={(item) => item.id}
-            scrollEnabled={false}
-            ItemSeparatorComponent={() => (
-              <View style={{ height: SPACING.md }} />
-            )}
-          />
-        </View>
-
-        {/* Recent Scans */}
+        {/* Recent Activity */}
         {recentScans.length > 0 && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Recent Activity</Text>
+              <Text
+                style={[styles.sectionTitle, { color: colors.textPrimary }]}
+              >
+                Recent Activity
+              </Text>
               <TouchableOpacity onPress={fetchData}>
-                <Ionicons name="refresh" size={20} color={COLORS.ACCENT} />
+                <Ionicons name="refresh" size={20} color={colors.primary} />
               </TouchableOpacity>
             </View>
-            <FlatList
-              data={recentScans}
-              renderItem={renderRecentScan}
-              keyExtractor={(item) => item._id}
-              scrollEnabled={false}
-              ItemSeparatorComponent={() => (
-                <View style={{ height: SPACING.md }} />
-              )}
-            />
+            {recentScans.map(item => renderRecentScan({item}))}
           </View>
         )}
-
-        {/* Empty State */}
-        {recentScans.length === 0 && (
-          <View style={styles.emptyContainer}>
-            <Ionicons
-              name="time-outline"
-              size={64}
-              color={COLORS.GRAY_MEDIUM}
-            />
-            <Text style={styles.emptyText}>No scans yet</Text>
-            <Text style={styles.emptySubText}>
-              Start by scanning an appliance or checking for scams
-            </Text>
-          </View>
-        )}
-
-        {/* Tips Section */}
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Quick Tips</Text>
-          <View style={[styles.tipCard, SHADOWS.sm]}>
-            <View style={styles.tipIconContainer}>
-              <Ionicons name="bulb" size={24} color={COLORS.WARNING} />
-            </View>
-            <View style={styles.tipContent}>
-              <Text style={styles.tipTitle}>Know Your Rights</Text>
-              <Text style={styles.tipText}>
-                Use Sarkari Saathi to draft official complaints to government
-                departments.
-              </Text>
-            </View>
-          </View>
-          <View style={[styles.tipCard, SHADOWS.sm]}>
-            <View style={styles.tipIconContainer}>
-              <Ionicons
-                name="shield-checkmark"
-                size={24}
-                color={COLORS.SUCCESS}
-              />
-            </View>
-            <View style={styles.tipContent}>
-              <Text style={styles.tipTitle}>Stay Protected</Text>
-              <Text style={styles.tipText}>
-                Always verify before clicking links or sharing personal
-                information online.
-              </Text>
-            </View>
-          </View>
-        </View>
-
-        <View style={{ height: SPACING.xxl }} />
       </ScrollView>
     </View>
   );
@@ -253,182 +236,168 @@ export default function HomeTab() {
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,
-    backgroundColor: COLORS.BG_SECONDARY,
   },
   container: {
     flex: 1,
-    backgroundColor: COLORS.BG_SECONDARY,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: COLORS.BG_SECONDARY,
-  },
-  header: {
-    paddingHorizontal: SPACING.lg,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.md,
-  },
-  greetingText: {
-    fontSize: FONT_SIZES.xxl,
-    fontWeight: "700",
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: SPACING.xs,
-  },
-  greetingSubText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.TEXT_SECONDARY,
-  },
-  statsCard: {
-    marginHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
-    backgroundColor: COLORS.WHITE,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-  },
-  statsContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  statsTextContainer: {
-    marginLeft: SPACING.lg,
-    flex: 1,
-  },
-  statsLabel: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.TEXT_SECONDARY,
-    marginBottom: SPACING.xs,
-  },
-  statsValue: {
-    fontSize: FONT_SIZES.xxxl,
-    fontWeight: "700",
-    color: COLORS.ACCENT,
   },
   section: {
-    paddingHorizontal: SPACING.lg,
-    marginBottom: SPACING.lg,
+    paddingHorizontal: 16,
+    marginTop: 24,
   },
   sectionHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: SPACING.md,
+    marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
+    fontSize: 20,
+    fontWeight: "bold",
+    fontFamily: 'Inter-Bold',
   },
+  // New Mohalla Widget Styles
+  mohallaCard: {
+    margin: 16,
+    borderRadius: 16,
+    padding: 20,
+    elevation: 8,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 10,
+  },
+  mohallaHeader: {
+    marginBottom: 12,
+  },
+  mohallaTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter-SemiBold',
+    opacity: 0.9
+  },
+  mohallaBody: {
+    alignItems: 'center',
+  },
+  mohallaText: {
+    fontSize: 16,
+    fontFamily: 'Inter-Regular',
+    marginBottom: 4,
+  },
+  mohallaPriceContainer: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'center',
+  },
+  mohallaPrice: {
+    fontSize: 48,
+    fontWeight: 'bold',
+    fontFamily: 'Inter-Black',
+  },
+  mohallaService: {
+    fontSize: 16,
+    marginLeft: 8,
+    fontFamily: 'Inter-Medium',
+    flexShrink: 1,
+  },
+  // Updated Feature Grid Styles
+  featuresGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    marginTop: 16,
+  },
+  gridItem: {
+    width: '48%',
+    aspectRatio: 1.2,
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 12,
+    alignItems: 'flex-start',
+    justifyContent: 'flex-end',
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+  },
+  gridItemText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    fontFamily: 'Inter-Bold',
+    marginTop: 8,
+  },
+  // Old Feature Card Styles (can be removed if grid is preferred)
   featureCard: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
+    borderRadius: 12,
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    marginBottom: 12,
   },
   featureIconContainer: {
-    width: 56,
-    height: 56,
-    borderRadius: BORDER_RADIUS.md,
+    width: 48,
+    height: 48,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: SPACING.md,
+    marginRight: 16,
   },
   featureContent: {
     flex: 1,
   },
   featureTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: 16,
     fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: SPACING.xs,
+    fontFamily: 'Inter-SemiBold',
   },
   featureDescription: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.TEXT_SECONDARY,
+    fontSize: 13,
+    fontFamily: 'Inter-Regular',
   },
   scanCard: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
+    borderRadius: 12,
+    padding: 16,
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: '#FFFFFF',
+    elevation: 2,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    marginBottom: 12,
   },
   scanIcon: {
     width: 48,
     height: 48,
-    borderRadius: BORDER_RADIUS.md,
+    borderRadius: 24,
     justifyContent: "center",
     alignItems: "center",
-    marginRight: SPACING.md,
+    marginRight: 16,
   },
   scanInfo: {
     flex: 1,
   },
   scanTitle: {
-    fontSize: FONT_SIZES.md,
+    fontSize: 15,
     fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: SPACING.xs,
   },
   scanTime: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.TEXT_LIGHT,
+    fontSize: 13,
   },
   savingsBadge: {
-    backgroundColor: `${COLORS.SUCCESS}20`,
-    paddingVertical: SPACING.sm,
-    paddingHorizontal: SPACING.md,
-    borderRadius: BORDER_RADIUS.md,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 8,
   },
   savingsText: {
-    color: COLORS.SUCCESS,
     fontWeight: "600",
-    fontSize: FONT_SIZES.sm,
-  },
-  tipCard: {
-    backgroundColor: COLORS.WHITE,
-    borderRadius: BORDER_RADIUS.lg,
-    padding: SPACING.lg,
-    flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: SPACING.md,
-  },
-  tipIconContainer: {
-    marginRight: SPACING.md,
-    marginTop: SPACING.xs,
-  },
-  tipContent: {
-    flex: 1,
-  },
-  tipTitle: {
-    fontSize: FONT_SIZES.md,
-    fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
-    marginBottom: SPACING.xs,
-  },
-  tipText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.TEXT_SECONDARY,
-    lineHeight: 20,
-  },
-  emptyContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 80,
-  },
-  emptyText: {
-    fontSize: FONT_SIZES.lg,
-    fontWeight: "600",
-    color: COLORS.TEXT_PRIMARY,
-    marginTop: SPACING.lg,
-  },
-  emptySubText: {
-    fontSize: FONT_SIZES.sm,
-    color: COLORS.TEXT_SECONDARY,
-    marginTop: SPACING.sm,
-    textAlign: "center",
-    paddingHorizontal: SPACING.lg,
+    fontSize: 13,
   },
 });

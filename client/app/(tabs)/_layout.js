@@ -1,27 +1,70 @@
-import { Tabs } from "expo-router";
+import { Tabs, useRouter } from "expo-router";
 import React from "react";
+import { Platform, TouchableOpacity } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { COLORS } from "../constants/colors";
+import { useTheme } from "../context/ThemeContext";
 
 export default function TabLayout() {
+  const { colors } = useTheme();
+  const router = useRouter();
+
   return (
     <Tabs
-      initialRouteName="home"
       screenOptions={{
-        tabBarActiveTintColor: COLORS.ACCENT,
-        tabBarInactiveTintColor: "#636e72",
+        headerShown: true,
+        headerStyle: {
+          backgroundColor: colors.ACCENT,
+          height: Platform.OS === "ios" ? 100 : undefined,
+        },
+        headerTintColor: colors.WHITE,
+        headerTitleAlign: "center",
+        headerTitle: "SahiHai",
+        headerTitleStyle: {
+          fontWeight: "bold",
+          fontSize: 22,
+          letterSpacing: 1,
+          color: colors.WHITE,
+        },
+        headerStatusBarHeight: Platform.OS === "ios" ? 44 : 0,
+        headerLeft: () => (
+          <TouchableOpacity
+            onPress={() => router.push("/menu")}
+            style={{ marginLeft: 15 }}
+          >
+            <Ionicons name="menu" size={28} color={colors.WHITE} />
+          </TouchableOpacity>
+        ),
+        headerRight: () => (
+          <TouchableOpacity
+            onPress={() => router.push("/(tabs)/settings")}
+            style={{ marginRight: 15 }}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              size={28}
+              color={colors.WHITE}
+            />
+          </TouchableOpacity>
+        ),
+        tabBarActiveTintColor: colors.ACCENT,
+        tabBarInactiveTintColor: colors.TEXT_TERTIARY,
         tabBarStyle: {
-          backgroundColor: "#fff",
-          borderTopLeftRadius: 18,
-          borderTopRightRadius: 18,
-          height: 68,
+          backgroundColor: colors.BG_SECONDARY,
+          borderTopWidth: 1,
+          borderTopColor: colors.BORDER,
+          height: Platform.OS === "ios" ? 85 : 65,
+          paddingBottom: Platform.OS === "ios" ? 25 : 10,
+          paddingTop: 10,
+          elevation: 8,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -2 },
-          shadowOpacity: 0.08,
+          shadowOpacity: 0.1,
           shadowRadius: 8,
-          elevation: 8,
         },
-        headerShown: false,
+        tabBarLabelStyle: {
+          fontSize: 12,
+          fontWeight: "600",
+        },
       }}
     >
       <Tabs.Screen
@@ -31,7 +74,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
-              size={26}
+              size={24}
               color={color}
             />
           ),
@@ -40,11 +83,11 @@ export default function TabLayout() {
       <Tabs.Screen
         name="scan"
         options={{
-          title: "Scan",
+          title: "Loot Meter",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "scan-circle" : "scan-circle-outline"}
-              size={26}
+              name={focused ? "speedometer" : "speedometer-outline"}
+              size={24}
               color={color}
             />
           ),
@@ -57,7 +100,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "cube" : "cube-outline"}
-              size={26}
+              size={24}
               color={color}
             />
           ),
@@ -70,23 +113,41 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "alert-circle" : "alert-circle-outline"}
-              size={26}
-              color={COLORS.DANGER}
+              size={24}
+              color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="sarkari"
+        name="chat"
         options={{
-          title: "Sarkari",
+          title: "Chat",
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
-              name={focused ? "document-text" : "document-text-outline"}
-              size={26}
-              color={COLORS.WARNING}
+              name={
+                focused ? "chatbubble-ellipses" : "chatbubble-ellipses-outline"
+              }
+              size={24}
+              color={color}
             />
           ),
+        }}
+      />
+
+      {/* Hidden screens - accessible from menu only */}
+      <Tabs.Screen
+        name="sarkari"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Sarkari Saathi",
+        }}
+      />
+      <Tabs.Screen
+        name="settings"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Settings",
         }}
       />
     </Tabs>
