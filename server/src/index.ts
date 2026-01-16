@@ -24,6 +24,7 @@ import {
 } from "./controllers/authController";
 import { getTijoriItems, addTijoriItem } from './controllers/tijoriController';
 import { checkChallan } from './controllers/challanController';
+import { listAppliances } from './controllers/applianceController';
 import { authMiddleware } from "./middleware/authMiddleware";
 import { connectToDatabase } from "./utils/dbConnect";
 
@@ -216,6 +217,11 @@ app.post(
 );
 
 // ======================
+// Appliance Routes
+// ======================
+app.get("/api/appliance/list", listAppliances);
+
+// ======================
 // Scanning and Analysis
 // ======================
 app.post(
@@ -233,6 +239,7 @@ app.post(
 
 app.post(
   "/api/chat/consult",
+  upload.single("file"),
   (req, res, next) => {
     logger.info("POST /api/chat/consult - Request received", {
       userMessage: req.body?.userMessage?.substring(0, 50),

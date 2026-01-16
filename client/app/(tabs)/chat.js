@@ -9,8 +9,11 @@ import {
   Platform,
   ActivityIndicator,
   StyleSheet,
+  Image,
+  Alert,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
 
@@ -30,6 +33,7 @@ export default function ChatAssistant() {
   ]);
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [attachment, setAttachment] = useState(null);
   const scrollViewRef = useRef(null);
 
   const quickActions = [
@@ -65,29 +69,55 @@ export default function ChatAssistant() {
     }
   };
 
+  const pickAttachment = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        quality: 0.7,
+        allowsEditing: true,
+      });
+
+      if (!result.canceled && result.assets && result.assets.length > 0) {
+        setAttachment(result.assets[0]);
+      }
+    } catch (error) {
+      Alert.alert("Error", "Could not pick image");
+    }
+  };
+
   const handleSend = async (text = inputText) => {
-    if (!text.trim()) return;
+    if (!text.trim() && !attachment) return;
 
     const userMessage = {
       id: Date.now().toString(),
       text: text.trim(),
       sender: "user",
       timestamp: new Date(),
+      image: attachment?.uri,
     };
 
     setMessages((prev) => [...prev, userMessage]);
     setInputText("");
+    setAttachment(null);
     setIsLoading(true);
 
     try {
+      const formData = new FormData();
+      formData.append("userMessage", text.trim());
+
+      if (attachment) {
+        formData.append("file", {
+          uri: attachment.uri,
+          name: "chat_attachment.jpg",
+          type: "image/jpeg",
+        });
+      }
+
       // Real API call to backend
       const response = await fetch(`${API_BASE_URL}/api/chat/consult`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userMessage: text.trim(),
-          scanContext: {}, // Can add bill scan context if available
-        }),
+        // Do not set Content-Type header manually when using FormData
+        body: formData,
       });
 
       if (!response.ok) {
@@ -143,6 +173,12 @@ export default function ChatAssistant() {
             },
           ]}
         >
+          {message.image && (
+            <Image
+              source={{ uri: message.image }}
+              style={styles.messageImage}
+            />
+          )}
           <Text
             style={[
               styles.messageText,
@@ -234,6 +270,27 @@ export default function ChatAssistant() {
           )}
         </ScrollView>
 
+        {/* Attachment Preview */}
+        {attachment && (
+          <View
+            style={[
+              styles.attachmentPreview,
+              { backgroundColor: colors.BG_SECONDARY },
+            ]}
+          >
+            <Image
+              source={{ uri: attachment.uri }}
+              style={styles.previewImage}
+            />
+            <TouchableOpacity
+              style={styles.removeAttachment}
+              onPress={() => setAttachment(null)}
+            >
+              <Ionicons name="close-circle" size={24} color={colors.DANGER} />
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Input */}
         <View
           style={[
@@ -241,6 +298,13 @@ export default function ChatAssistant() {
             { backgroundColor: colors.BG_SECONDARY },
           ]}
         >
+          <TouchableOpacity
+            style={styles.attachButton}
+            onPress={pickAttachment}
+          >
+            <Ionicons name="attach" size={24} color={colors.TEXT_SECONDARY} />
+          </TouchableOpacity>
+
           <TextInput
             style={[
               styles.input,
@@ -261,13 +325,14 @@ export default function ChatAssistant() {
             style={[
               styles.sendButton,
               {
-                backgroundColor: inputText.trim()
-                  ? colors.ACCENT
-                  : colors.BG_TERTIARY,
+                backgroundColor:
+                  inputText.trim() || attachment
+                    ? colors.ACCENT
+                    : colors.BG_TERTIARY,
               },
             ]}
             onPress={() => handleSend()}
-            disabled={!inputText.trim() || isLoading}
+            disabled={(!inputText.trim() && !attachment) || isLoading}
           >
             <Ionicons
               name="send"
@@ -329,6 +394,12 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 18,
   },
+  messageImage: {
+    width: 200,
+    height: 150,
+    borderRadius: 12,
+    marginBottom: 8,
+  },
   messageText: {
     fontSize: 15,
     lineHeight: 20,
@@ -356,11 +427,30 @@ const styles = StyleSheet.create({
     fontSize: 15,
     marginRight: 8,
   },
+  attachButton: {
+    padding: 10,
+    marginRight: 4,
+    justifyContent: "center",
+    alignItems: "center",
+  },
   sendButton: {
     width: 40,
     height: 40,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",
+  },
+  attachmentPreview: {
+    padding: 10,
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  previewImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+  },
+  removeAttachment: {
+    marginLeft: 10,
   },
 });

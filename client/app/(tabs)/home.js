@@ -75,7 +75,7 @@ export default function HomeTab() {
       title: "RTO Challan",
       description: "Check traffic fines",
       colorKey: "error",
-      route: "/features/challan",
+      route: "/challan",
     },
     {
       id: "inventory",
@@ -225,7 +225,13 @@ export default function HomeTab() {
                 <Ionicons name="refresh" size={20} color={colors.primary} />
               </TouchableOpacity>
             </View>
-            {recentScans.map(item => renderRecentScan({item}))}
+            <FlatList
+              data={recentScans}
+              renderItem={renderRecentScan}
+              keyExtractor={(item) => item._id}
+              scrollEnabled={false}
+              ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
+            />
           </View>
         )}
       </ScrollView>

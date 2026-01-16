@@ -50,11 +50,11 @@ export default function TabLayout() {
         tabBarInactiveTintColor: colors.TEXT_TERTIARY,
         tabBarStyle: {
           backgroundColor: colors.BG_SECONDARY,
-          borderTopWidth: 1,
+          borderTopWidth: 0.5,
           borderTopColor: colors.BORDER,
-          height: Platform.OS === "ios" ? 85 : 65,
-          paddingBottom: Platform.OS === "ios" ? 25 : 10,
-          paddingTop: 10,
+          height: Platform.OS === "ios" ? 75 : 60,
+          paddingBottom: Platform.OS === "ios" ? 20 : 5,
+          paddingTop: 5,
           elevation: 8,
           shadowColor: "#000",
           shadowOffset: { width: 0, height: -2 },
@@ -62,7 +62,7 @@ export default function TabLayout() {
           shadowRadius: 8,
         },
         tabBarLabelStyle: {
-          fontSize: 12,
+          fontSize: 10,
           fontWeight: "600",
         },
       }}
@@ -74,7 +74,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "home" : "home-outline"}
-              size={24}
+              size={26}
               color={color}
             />
           ),
@@ -87,7 +87,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "speedometer" : "speedometer-outline"}
-              size={24}
+              size={26}
               color={color}
             />
           ),
@@ -100,7 +100,7 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "cube" : "cube-outline"}
-              size={24}
+              size={26}
               color={color}
             />
           ),
@@ -113,10 +113,17 @@ export default function TabLayout() {
           tabBarIcon: ({ color, focused }) => (
             <Ionicons
               name={focused ? "alert-circle" : "alert-circle-outline"}
-              size={24}
+              size={26}
               color={color}
             />
           ),
+        }}
+      />
+      <Tabs.Screen
+        name="sarkari"
+        options={{
+          href: null, // Hide from tab bar
+          title: "Sarkari Saathi",
         }}
       />
       <Tabs.Screen
@@ -128,19 +135,10 @@ export default function TabLayout() {
               name={
                 focused ? "chatbubble-ellipses" : "chatbubble-ellipses-outline"
               }
-              size={24}
+              size={26}
               color={color}
             />
           ),
-        }}
-      />
-
-      {/* Hidden screens - accessible from menu only */}
-      <Tabs.Screen
-        name="sarkari"
-        options={{
-          href: null, // Hide from tab bar
-          title: "Sarkari Saathi",
         }}
       />
       <Tabs.Screen

@@ -2,23 +2,25 @@ import React from "react";
 import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
+import { useTheme } from "../context/ThemeContext";
 import {
-  COLORS,
   SHADOWS,
   SPACING,
   BORDER_RADIUS,
   FONT_SIZES,
-} from "../constants/colors";
+} from "../constants/style";
 
 export default function ModernHeader({ title, subtitle, showMenu = true }) {
   const navigation = useNavigation();
+  const { colors } = useTheme();
 
   const openDrawer = () => {
-    navigation.openDrawer?.();
+    // This assumes you have a drawer navigator. If not, replace with your menu logic.
+    navigation.openDrawer?.(); 
   };
 
   return (
-    <View style={[styles.header, SHADOWS.sm]}>
+    <View style={[styles.header, SHADOWS.sm, { backgroundColor: colors.primary, paddingTop: SPACING.lg, paddingBottom: SPACING.lg, paddingHorizontal: SPACING.lg }]}>
       <View style={styles.headerContent}>
         <View style={styles.titleContainer}>
           {showMenu && (
@@ -27,12 +29,12 @@ export default function ModernHeader({ title, subtitle, showMenu = true }) {
               onPress={openDrawer}
               activeOpacity={0.7}
             >
-              <Ionicons name="menu" size={28} color={COLORS.WHITE} />
+              <Ionicons name="menu" size={28} color={colors.white} />
             </TouchableOpacity>
           )}
           <View style={styles.titleText}>
-            <Text style={styles.title}>{title}</Text>
-            {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
+            <Text style={[styles.title, { color: colors.white }]}>{title}</Text>
+            {subtitle && <Text style={[styles.subtitle, { color: `${colors.white}80` }]}>{subtitle}</Text>}
           </View>
         </View>
 
@@ -41,10 +43,10 @@ export default function ModernHeader({ title, subtitle, showMenu = true }) {
             <Ionicons
               name="notifications-outline"
               size={24}
-              color={COLORS.WHITE}
+              color={colors.white}
             />
-            <View style={styles.notificationBadge}>
-              <Text style={styles.badgeText}>3</Text>
+            <View style={[styles.notificationBadge, { backgroundColor: colors.error }]}>
+              <Text style={[styles.badgeText, { color: colors.white }]}>3</Text>
             </View>
           </TouchableOpacity>
         </View>
@@ -55,10 +57,7 @@ export default function ModernHeader({ title, subtitle, showMenu = true }) {
 
 const styles = StyleSheet.create({
   header: {
-    backgroundColor: COLORS.ACCENT,
-    paddingTop: SPACING.lg,
-    paddingBottom: SPACING.lg,
-    paddingHorizontal: SPACING.lg,
+    // backgroundColor is now applied inline
   },
   headerContent: {
     flexDirection: "row",
@@ -80,11 +79,9 @@ const styles = StyleSheet.create({
   title: {
     fontSize: FONT_SIZES.xl,
     fontWeight: "700",
-    color: COLORS.WHITE,
   },
   subtitle: {
     fontSize: FONT_SIZES.sm,
-    color: `${COLORS.WHITE}80`,
     marginTop: SPACING.xs,
   },
   headerActions: {
@@ -99,7 +96,6 @@ const styles = StyleSheet.create({
     position: "absolute",
     top: 0,
     right: 0,
-    backgroundColor: COLORS.DANGER,
     borderRadius: BORDER_RADIUS.full,
     width: 20,
     height: 20,
@@ -107,7 +103,6 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   badgeText: {
-    color: COLORS.WHITE,
     fontSize: FONT_SIZES.xs,
     fontWeight: "700",
   },

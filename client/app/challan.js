@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, SafeAreaView, Keyboard, TouchableWithoutFeedback, ActivityIndicator } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
-import ModernHeader from '../components/ModernHeader';
+import { useTheme } from './context/ThemeContext';
+import ModernHeader from './components/ModernHeader';
 
 const ChallanResultCard = ({ colors, challanData, onPay, onContest }) => (
   <View style={[styles.card, { backgroundColor: colors.surface, shadowColor: colors.black }]}>

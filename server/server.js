@@ -95,7 +95,7 @@ app.get("/", (req, res) => {
 app.post("/analyze", upload.single("file"), analyzeMedia);
 
 // AI Chat Consultation Route
-app.post("/api/chat/consult", consultAssistant);
+app.post("/api/chat/consult", upload.single("file"), consultAssistant);
 
 // Scam Detection Route
 app.post("/api/scam/check", upload.single("file"), checkScam);

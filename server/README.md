@@ -1,70 +1,65 @@
-# SahiHai Backend (Node.js, Express, MongoDB)
+# SahiHai Backend
 
-## Overview
-
-This is the backend for the SahiHai Indian Consumer Defense App. It provides APIs for:
-
-- Bill image and audio upload/analysis
-- AI-powered extraction and price-checking
-- Result storage and retrieval
+This directory contains the Node.js (Express) backend for the SahiHai application.
 
 ## Features
 
-- **Scan Bills (Image):** Extracts items/prices from bill images using Google Gemini 1.5 Flash.
-- **Record Audio:** Diagnoses car noises or summarizes legal complaints from audio using Gemini 1.5 Flash.
-- **Loot Meter:** Flags overcharged items using Groq (Llama 3) with Indian market logic.
-- **MongoDB:** Stores all scans and results.
+The backend provides a range of APIs, including:
 
-## API Endpoints
+-   **Authentication**: User signup and login.
+-   **AI Chat**: Real-time chat with AI models.
+-   **Challan Check**: Check for vehicle challans.
+-   **Scan & Analyze**: Analyze images and audio for information.
+-   **And more...**
 
-### POST `/analyze`
+## Getting Started
 
-- Accepts: `multipart/form-data` with a file (`.jpg`, `.m4a`, `.mp3`)
-- Returns: Analysis result JSON
+### 1. Install Dependencies
 
-### GET `/result/:id`
+```bash
+npm install
+```
 
-- Returns: Analysis result for a scan
+### 2. Configure Environment Variables
 
-### GET `/scans`
+Create a `.env` file in this directory by copying the example:
 
-- Returns: List of recent scans and total money saved
+```bash
+cp .env.example .env
+```
 
-## Setup
+Now, open `.env` and fill in the following variables:
 
-1. Install dependencies:
-   ```sh
-   npm install
-   ```
-2. Create a `.env` file:
-   ```env
-   MONGODB_URI=your_mongodb_connection_string
-   GOOGLE_API_KEY=your_google_gemini_key
-   GROQ_API_KEY=your_groq_key
-   PORT=5051
-   ```
-3. Start the server:
-   ```sh
-   node server.js
-   ```
+-   `PORT`: The port for the server to run on (e.g., `5051`).
+-   `NODE_ENV`: Set to `development` for local development.
+-   `MONGO_URI`: (Optional) Your MongoDB connection string.
+-   `GEMINI_KEY`, `GROQ_API_KEY`, `OPENAI_API_KEY`: API keys for the various AI services used in the app.
+-   `CORS_ORIGIN`: The origin URLs to allow for CORS, typically your client's address.
 
-## Deployment
+#### Challan Check API
 
-- Deploy to any Node.js host (Render, Railway, Heroku, etc.)
-- Expose port 5000 (or your chosen port)
-- Set environment variables for production
+To enable the real-time challan checking feature, you must subscribe to a commercial challan API provider. Once you have an API endpoint and key, add them to your `.env` file:
 
-## File Structure
+-   `CHALLAN_API_ENDPOINT`: The endpoint URL provided by your challan API service.
+-   `CHALLAN_API_KEY`: Your API key for the challan service.
 
-- `server.js` - Main entry point
-- `controllers/analyzeController.js` - Handles AI logic
-- `models/Scan.js` - Mongoose model for scans
+If these variables are not provided, the server will return mock data for the challan check feature, allowing for development without an active subscription.
 
-## Notes
+### 3. Start the Server
 
-- For local mobile testing, use your machine's IP as the API baseURL in the mobile app.
-- For production, update CORS and baseURL accordingly.
+```bash
+npm start
+```
 
----
+The server will transpile the TypeScript code and start the application.
 
-For any issues, open an issue or PR on GitHub.
+## Project Structure
+
+The source code is located in the `src` directory and follows a standard Express application structure:
+
+-   `src/controllers/`: Handles the logic for each API route.
+-   `src/models/`: Defines the Mongoose schemas for the database.
+-   `src/middleware/`: Contains middleware functions (e.g., for authentication).
+-   `src/services/`: Houses services that interact with external APIs (like AI services).
+-   `src/utils/`: Utility functions.
+-   `src/index.ts`: The main entry point for the application.

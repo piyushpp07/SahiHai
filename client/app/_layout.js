@@ -71,6 +71,8 @@ export default function RootLayout() {
               <Stack.Screen name="login" options={{ headerShown: false }} />
               <Stack.Screen name="signup" options={{ headerShown: false }} />
               <Stack.Screen name="menu" options={{ headerShown: false }} />
+              <Stack.Screen name="tijori" options={{ headerShown: false }} />
+              <Stack.Screen name="challan" options={{ headerShown: false }} />
             </Stack>
           </NavigationHandler>
         </AuthProvider>

@@ -8,7 +8,8 @@ import {
   Alert,
 } from "react-native";
 import { Audio } from "expo-av";
-import * as Print from "expo-print";
+import * as FileSystem from "expo-file-system";
+import * as Sharing from "expo-sharing";
 import api from "../utils/api";
 
 export default function SarkariSaathi() {
@@ -57,7 +58,30 @@ export default function SarkariSaathi() {
 
   const generatePDF = async () => {
     if (!complaintText) return;
-    await Print.printAsync({ html: `<pre>${complaintText}</pre>` });
+    setLoading(true);
+    try {
+      const res = await api.post("/api/sarkari/generate-pdf", {
+        letter: complaintText,
+      });
+      const { pdf: pdfBase64 } = res.data;
+
+      const pdfPath = `${FileSystem.documentDirectory}complaint.pdf`;
+      await FileSystem.writeAsStringAsync(pdfPath, pdfBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
+      if (!(await Sharing.isAvailableAsync())) {
+        alert(`Uh oh, sharing isn't available on your platform`);
+        return;
+      }
+
+      await Sharing.shareAsync(pdfPath);
+    } catch (e) {
+      console.error(e);
+      Alert.alert("Error", "Failed to generate PDF.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

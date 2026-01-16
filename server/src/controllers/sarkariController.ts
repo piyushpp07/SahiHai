@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import Groq from "groq-sdk";
 import fs from "fs";
-import { generateSimplePDF } from "../utils/pdfGenerator";
+import { generateSimplePDF, generateComplaintLetterPDFasBase64 } from "../utils/pdfGenerator";
 import { SARKARI_LEGAL_PROMPT } from "../prompts/marketPrompts";
 
 // Import logger from a shared location or create a simple console logger
@@ -181,17 +181,17 @@ Sincerely,
   }
 };
 
-// New endpoint: Generate PDF from letter text
-export const generateLetterPDF = async (req: Request, res: Response) => {
+// This function streams the PDF to the response
+export const generateLetterPDFStream = async (req: Request, res: Response) => {
   try {
     const { letter, userInfo } = req.body;
 
     if (!letter || typeof letter !== "string" || letter.trim() === "") {
-      logger.warn("generateLetterPDF: No letter content provided");
+      logger.warn("generateLetterPDFStream: No letter content provided");
       return res.status(400).json({ error: "Letter content is required." });
     }
 
-    logger.info("generateLetterPDF: Generating PDF", {
+    logger.info("generateLetterPDFStream: Generating PDF", {
       letterLength: letter.length,
       hasUserInfo: !!userInfo,
     });
@@ -208,6 +208,39 @@ export const generateLetterPDF = async (req: Request, res: Response) => {
     });
   }
 };
+
+// This function returns the PDF as a base64 string
+export const generateLetterPDF = async (req: Request, res: Response) => {
+  try {
+    const { letter, userInfo } = req.body;
+
+    if (!letter || typeof letter !== "string" || letter.trim() === "") {
+      logger.warn("generateLetterPDF: No letter content provided");
+      return res.status(400).json({ error: "Letter content is required." });
+    }
+
+    logger.info("generateLetterPDF: Generating PDF as base64", {
+      letterLength: letter.length,
+      hasUserInfo: !!userInfo,
+    });
+
+    const pdfBase64 = await generateComplaintLetterPDFasBase64({
+      letterContent: letter,
+      userInfo,
+    });
+
+    res.status(200).json({ pdf: pdfBase64 });
+
+    logger.info("✅ PDF base64 generation successful");
+  } catch (error: any) {
+    logger.error("❌ Failed to generate PDF as base64", { error: error.message });
+    res.status(500).json({
+      error: "Failed to generate PDF as base64.",
+      details: error.message,
+    });
+  }
+};
+
 
 // New endpoint: Draft letter from text (without audio)
 export const draftLetterFromText = async (req: Request, res: Response) => {

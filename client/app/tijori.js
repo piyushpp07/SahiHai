@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, FlatList, TouchableOpacity, SafeAreaView, Dimensions, ScrollView } from 'react-native';
-import { useTheme } from '../context/ThemeContext';
-import ModernHeader from '../components/ModernHeader'; // Assuming a modern header component exists
+import { useTheme } from './context/ThemeContext';
+import ModernHeader from './components/ModernHeader'; // Assuming a modern header component exists
 
 // Mock Data for Warranties
 const MOCK_WARRANTIES = {

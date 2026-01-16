@@ -18,7 +18,7 @@ import {
   SPACING,
   BORDER_RADIUS,
   FONT_SIZES,
-} from "../constants/colors";
+} from "../constants/style";
 
 export default function LootMeterTab() {
   const [image, setImage] = useState(null);
