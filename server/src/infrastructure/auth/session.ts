@@ -1,17 +1,10 @@
 import session from 'express-session';
-import RedisStore from 'connect-redis';
-import redisClient from '../redis/client';
 import { Express } from 'express';
 
 export const configureSession = (app: Express) => {
-  const redisStore = new RedisStore({
-    client: redisClient,
-    prefix: 'sahihai:',
-  });
 
   app.use(
     session({
-      store: redisStore,
       secret: process.env.SESSION_SECRET || 'supersecretkey',
       resave: false,
       saveUninitialized: false,

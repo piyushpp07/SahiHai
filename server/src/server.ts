@@ -2,7 +2,6 @@ import sticky from 'sticky-session';
 import http from 'http';
 import { app, connectDatabase } from './app';
 import logger from './infrastructure/logging/logger';
-import redisClient from './infrastructure/redis/client';
 import { Server } from 'socket.io'; // We will use this later for AI
 
 const port = parseInt(process.env.PORT || '3000', 10);

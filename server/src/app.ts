@@ -5,7 +5,6 @@ import helmet from 'helmet';
 import compression from 'compression';
 import { connectDatabase } from './infrastructure/database/mongoose/connection';
 import logger from './infrastructure/logging/logger';
-import redisClient from './infrastructure/redis/client';
 
 dotenv.config();
 
