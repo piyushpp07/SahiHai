@@ -1,0 +1,16 @@
+import mongoose, { Schema, Document } from 'mongoose';
+import { User } from '../../../../domain/User';
+
+export interface IUserDocument extends Omit<User, 'id'>, Document {}
+
+const UserSchema = new Schema<IUserDocument>(
+  {
+    phoneNumber: { type: String, required: true, unique: true },
+    name: { type: String },
+    preferredLanguage: { type: String, default: 'en' },
+    metadata: { type: Schema.Types.Mixed },
+  },
+  { timestamps: true }
+);
+
+export const UserModel = mongoose.model<IUserDocument>('User', UserSchema);
