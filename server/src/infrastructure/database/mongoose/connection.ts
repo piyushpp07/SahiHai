@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { env } from '../../config/env';
+import { env } from '../../../config/env';
 import logger from '../../logging/logger';
 
 export class MongoConnection {
@@ -15,10 +15,15 @@ export class MongoConnection {
     }
 
     try {
-      await mongoose.connect(env.MONGODB_URI);
+      await mongoose.connect(env.MONGODB_URI, {
+        bufferCommands: false, // Prevent the 10s buffering timeout
+        connectTimeoutMS: 15000,
+        socketTimeoutMS: 45000,
+      });
       this.isConnected = true;
-      logger.info('Connected to MongoDB');
+      logger.info('Connected to MongoDB (Buffering Disabled)');
     } catch (error) {
+
       logger.error('MongoDB connection error:', error);
       throw error;
     }

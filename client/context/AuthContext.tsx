@@ -37,15 +37,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }, []);
 
     useEffect(() => {
+        // Disabling auth redirection for testing as requested
+        /*
         if (isLoading) return;
         
-        const inAuthGroup = rootSegment === 'auth';
+        const inAuthGroup = rootSegment === '(auth)';
 
         if (!user && !inAuthGroup) {
-            router.replace('/auth/login');
+            router.replace('/(auth)/login');
         } else if (user && inAuthGroup) {
-            router.replace('/');
+            router.replace('/(tabs)');
         }
+        */
     }, [user, rootSegment, isLoading]);
 
     const signIn = async (email: string, pass: string) => {

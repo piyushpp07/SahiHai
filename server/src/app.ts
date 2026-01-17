@@ -1,57 +1,82 @@
 import express from 'express';
-import dotenv from 'dotenv';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
-import { connectDatabase } from './infrastructure/database/mongoose/connection';
+import { MongoConnection } from './infrastructure/database/mongoose/connection';
+import { sessionMiddleware } from './infrastructure/redis/RedisSessionStore';
+import { providerLockMiddleware } from './interfaces/http/middleware/providerLock';
 import logger from './infrastructure/logging/logger';
+import { env } from './config/env';
 
-dotenv.config();
+// Routes
+import authRoutes from './interfaces/http/routes/authRoutes';
+import chatRoutes from './interfaces/http/routes/chatRoutes';
+import utilityRoutes from './interfaces/http/routes/utilityRoutes';
 
 const app = express();
-const port = process.env.PORT || 3000;
 
-// Database Connection Middleware (Ensures connection on Vercel)
-app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    try {
-        await connectDatabase();
-        next();
-    } catch (error) {
-        logger.error('Failed to connect to database during request:', error);
-        res.status(500).json({ error: 'Database connection failed' });
-    }
-});
-
-// Middleware
+/**
+ * 1. Security & Optimization Middleware
+ */
 app.use(helmet());
 app.use(cors({
-    origin: true, // Allow any origin
-    credentials: true // Allow cookies/session
+  origin: true,
+  credentials: true
 }));
 app.use(compression());
 app.use(express.json());
 
-// Session
-import { configureSession } from './infrastructure/auth/session';
-import chatRoutes from './interfaces/http/routes/chatRoutes';
-import utilityRoutes from './interfaces/http/routes/utilityRoutes';
-import authRoutes from './interfaces/http/routes/authRoutes';
+/**
+ * 2. Session Management (Redis Backed)
+ */
+app.use(sessionMiddleware);
 
-configureSession(app);
+/**
+ * 3. Blueprint Protocols (Provider Lock)
+ */
+app.use(providerLockMiddleware);
 
-// Routes
+/**
+ * 4. Database Connection Middleware (Serverless/Clustered Safe)
+ */
+app.use(async (req, res, next) => {
+  try {
+    await MongoConnection.connect();
+    next();
+  } catch (error) {
+    logger.error('Database connection failure:', error);
+    res.status(500).json({ error: 'Infrastructure Error' });
+  }
+});
+
+/**
+ * 5. Route Composition
+ */
 app.use('/auth', authRoutes);
 app.use('/chat', chatRoutes);
 app.use('/utilities', utilityRoutes);
 
-// Basic health check
+/**
+ * 6. Health & Diagnostics
+ */
 app.get('/health', (req, res) => {
-  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+  res.json({
+    status: 'ok',
+    environment: env.NODE_ENV,
+    timestamp: new Date().toISOString()
+  });
 });
 
-export { app, connectDatabase };
+/**
+ * 7. Global Error Handler
+ */
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  logger.error('Unhandled Exception:', err);
+  res.status(500).json({
+    error: 'Internal Server Error',
+    message: env.NODE_ENV === 'development' ? err.message : 'Something went wrong',
+  });
+});
+
+export { app };
 export default app;
-
-
-
-

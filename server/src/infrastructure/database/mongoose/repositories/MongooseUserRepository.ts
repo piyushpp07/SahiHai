@@ -3,7 +3,7 @@ import { User } from '../../../../domain/entities/User';
 import { IUserRepository } from '../../../../domain/repositories/IUserRepository';
 import { UserSchema } from '../schemas/UserSchema';
 
-const UserModel = mongoose.model<User>('User', UserSchema);
+const UserModel = mongoose.models.User || mongoose.model<User>('User', UserSchema);
 
 export class MongooseUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {

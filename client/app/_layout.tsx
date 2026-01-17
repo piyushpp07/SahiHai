@@ -1,27 +1,42 @@
-import { GluestackUIProvider } from "@gluestack-ui/themed"
-import { config } from "@gluestack-ui/config"
 import { Stack } from 'expo-router';
-import "../global.css";
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+import { config } from '@gluestack-ui/config';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '../context/AuthContext';
+import { useFonts } from 'expo-font';
+import * as SplashScreen from 'expo-splash-screen';
+import { useEffect } from 'react';
+import '../global.css';
 
 const queryClient = new QueryClient();
 
-export default function Layout() {
+// Prevent splash screen from auto-hiding
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    // Add custom fonts from blueprint (Inter, Clash Display) if available
+    // For now, using system defaults
+  });
+
+  useEffect(() => {
+    if (loaded || error) {
+      SplashScreen.hideAsync();
+    }
+  }, [loaded, error]);
+
+  if (!loaded && !error) {
+    return null;
+  }
+
   return (
-    <QueryClientProvider client={queryClient}>
-        <GluestackUIProvider config={config}>
-            <AuthProvider>
-                <Stack>
-                    <Stack.Screen name="index" options={{ title: 'SahiHai', headerShown: false }} />
-                    <Stack.Screen name="chat/[id]" options={{ title: 'Chat' }} />
-                    <Stack.Screen name="auth/login" options={{ title: 'Login', headerShown: false }} />
-                    <Stack.Screen name="auth/register" options={{ title: 'Sign Up', headerShown: false }} />
-                    <Stack.Screen name="rewards" options={{ title: 'My Rewards' }} />
-                </Stack>
-            </AuthProvider>
-        </GluestackUIProvider>
-    </QueryClientProvider>
+    <GluestackUIProvider config={config}>
+      <QueryClientProvider client={queryClient}>
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+          </Stack>
+        </AuthProvider>
+      </QueryClientProvider>
+    </GluestackUIProvider>
   );
 }
-
