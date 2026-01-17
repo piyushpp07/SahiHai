@@ -7,6 +7,9 @@ import { ThemeProvider, useTheme } from "./context/ThemeContext";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import { View, ActivityIndicator } from "react-native";
 import * as SplashScreen from "expo-splash-screen";
+import { GluestackUIProvider } from '@gluestack-ui/themed';
+import { config } from '@gluestack-ui/config';
+
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -62,21 +65,23 @@ function NavigationHandler({ children }) {
 
 export default function RootLayout() {
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <ThemeProvider>
-        <AuthProvider>
-          <NavigationHandler>
-            <Stack screenOptions={{ headerShown: false }}>
-              <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="login" options={{ headerShown: false }} />
-              <Stack.Screen name="signup" options={{ headerShown: false }} />
-              <Stack.Screen name="menu" options={{ headerShown: false }} />
-              <Stack.Screen name="tijori" options={{ headerShown: false }} />
-              <Stack.Screen name="challan" options={{ headerShown: false }} />
-            </Stack>
-          </NavigationHandler>
-        </AuthProvider>
-      </ThemeProvider>
-    </GestureHandlerRootView>
+    <GluestackUIProvider config={config}>
+      <GestureHandlerRootView style={{ flex: 1 }}>
+        <ThemeProvider>
+          <AuthProvider>
+            <NavigationHandler>
+              <Stack screenOptions={{ headerShown: false }}>
+                <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+                <Stack.Screen name="login" options={{ headerShown: false }} />
+                <Stack.Screen name="signup" options={{ headerShown: false }} />
+                <Stack.Screen name="menu" options={{ headerShown: false }} />
+                <Stack.Screen name="tijori" options={{ headerShown: false }} />
+                <Stack.Screen name="challan" options={{ headerShown: false }} />
+              </Stack>
+            </NavigationHandler>
+          </AuthProvider>
+        </ThemeProvider>
+      </GestureHandlerRootView>
+    </GluestackUIProvider>
   );
 }
