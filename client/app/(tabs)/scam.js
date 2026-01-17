@@ -22,6 +22,7 @@ import {
 
 export default function ScamTab() {
   const { colors } = useTheme();
+  const styles = getStyles(colors);
   const [image, setImage] = useState(null);
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -291,7 +292,7 @@ export default function ScamTab() {
   );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors) => StyleSheet.create({
   wrapper: {
     flex: 1,
   },
