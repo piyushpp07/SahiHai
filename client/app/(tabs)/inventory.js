@@ -61,7 +61,7 @@ export default function InventoryTab() {
         </View>
         <View style={styles.cardInfo}>
           <Text style={styles.applanceName}>
-            {item.brand} {item.model}
+            {item.brand} {item.modelName}
           </Text>
           <Text style={styles.serial}>Serial: {item.serial}</Text>
         </View>

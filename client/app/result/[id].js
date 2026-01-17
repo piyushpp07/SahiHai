@@ -138,7 +138,10 @@ export default function ResultScreen() {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.chatButton}
-        onPress={() => router.push("/(tabs)/chat")}
+        onPress={() => router.push({
+          pathname: "/(tabs)/chat",
+          params: { scanContext: JSON.stringify(result) }
+        })}
       >
         <Text style={{ color: "#fff" }}>Chat with Assistant</Text>
       </TouchableOpacity>

@@ -2,7 +2,7 @@ import { Schema, model, Document } from 'mongoose';
 
 export interface IAppliance extends Document {
   brand: string;
-  model: string;
+  modelName: string;
   serial: string;
   age_years: number;
   is_warranty_likely_expired: boolean;
@@ -13,7 +13,7 @@ export interface IAppliance extends Document {
 
 const ApplianceSchema = new Schema<IAppliance>({
   brand: { type: String, required: true },
-  model: { type: String, required: true },
+  modelName: { type: String, required: true },
   serial: { type: String, required: true },
   age_years: { type: Number, required: true },
   is_warranty_likely_expired: { type: Boolean, required: true },

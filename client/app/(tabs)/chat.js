@@ -16,6 +16,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import * as ImagePicker from "expo-image-picker";
 import { Ionicons } from "@expo/vector-icons";
 import { useTheme } from "../context/ThemeContext";
+import { useLocalSearchParams } from "expo-router";
 
 // API Base URL from environment variable
 const API_BASE_URL =
@@ -23,6 +24,7 @@ const API_BASE_URL =
 
 export default function ChatAssistant() {
   const { colors } = useTheme();
+  const params = useLocalSearchParams();
   const [messages, setMessages] = useState([
     {
       id: "1",
@@ -34,7 +36,18 @@ export default function ChatAssistant() {
   const [inputText, setInputText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [attachment, setAttachment] = useState(null);
+  const [scanContext, setScanContext] = useState(null);
   const scrollViewRef = useRef(null);
+
+  useEffect(() => {
+    if (params.scanContext) {
+      try {
+        setScanContext(JSON.parse(params.scanContext));
+      } catch (e) {
+        console.error("Failed to parse scanContext", e);
+      }
+    }
+  }, [params.scanContext]);
 
   const quickActions = [
     {
@@ -72,7 +85,7 @@ export default function ChatAssistant() {
   const pickAttachment = async () => {
     try {
       const result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        mediaTypes: ImagePicker.MediaType.Images,
         quality: 0.7,
         allowsEditing: true,
       });
@@ -105,6 +118,10 @@ export default function ChatAssistant() {
       const formData = new FormData();
       formData.append("userMessage", text.trim());
 
+      if (scanContext) {
+        formData.append("scanContext", JSON.stringify(scanContext));
+      }
+
       if (attachment) {
         formData.append("file", {
           uri: attachment.uri,
@@ -129,7 +146,7 @@ export default function ChatAssistant() {
       const botMessage = {
         id: (Date.now() + 1).toString(),
         text:
-          data.assistantReply ||
+          data.reply ||
           data.message ||
           "I'm here to help! How can I assist you?",
         sender: "bot",
@@ -160,13 +177,13 @@ export default function ChatAssistant() {
     return (
       <View
         key={message.id}
-        style={[
+        style={[ 
           styles.messageContainer,
           isBot ? styles.botMessage : styles.userMessage,
         ]}
       >
         <View
-          style={[
+          style={[ 
             styles.messageBubble,
             {
               backgroundColor: isBot ? colors.BG_SECONDARY : colors.ACCENT,
@@ -180,7 +197,7 @@ export default function ChatAssistant() {
             />
           )}
           <Text
-            style={[
+            style={[ 
               styles.messageText,
               {
                 color: isBot ? colors.TEXT_PRIMARY : colors.WHITE,
@@ -190,7 +207,7 @@ export default function ChatAssistant() {
             {message.text}
           </Text>
           <Text
-            style={[
+            style={[ 
               styles.timestamp,
               {
                 color: isBot ? colors.TEXT_SECONDARY : colors.WHITE,
@@ -219,7 +236,7 @@ export default function ChatAssistant() {
       >
         {/* Quick Actions */}
         <View
-          style={[
+          style={[ 
             styles.quickActions,
             { backgroundColor: colors.BG_SECONDARY },
           ]}
@@ -228,7 +245,7 @@ export default function ChatAssistant() {
             {quickActions.map((action, index) => (
               <TouchableOpacity
                 key={index}
-                style={[
+                style={[ 
                   styles.quickActionButton,
                   { borderColor: colors.BORDER },
                 ]}
@@ -236,7 +253,7 @@ export default function ChatAssistant() {
               >
                 <Ionicons name={action.icon} size={20} color={colors.ACCENT} />
                 <Text
-                  style={[
+                  style={[ 
                     styles.quickActionText,
                     { color: colors.TEXT_PRIMARY },
                   ]}
@@ -259,7 +276,7 @@ export default function ChatAssistant() {
           {isLoading && (
             <View style={[styles.messageContainer, styles.botMessage]}>
               <View
-                style={[
+                style={[ 
                   styles.messageBubble,
                   { backgroundColor: colors.BG_SECONDARY },
                 ]}
@@ -273,7 +290,7 @@ export default function ChatAssistant() {
         {/* Attachment Preview */}
         {attachment && (
           <View
-            style={[
+            style={[ 
               styles.attachmentPreview,
               { backgroundColor: colors.BG_SECONDARY },
             ]}
@@ -293,7 +310,7 @@ export default function ChatAssistant() {
 
         {/* Input */}
         <View
-          style={[
+          style={[ 
             styles.inputContainer,
             { backgroundColor: colors.BG_SECONDARY },
           ]}
@@ -306,7 +323,7 @@ export default function ChatAssistant() {
           </TouchableOpacity>
 
           <TextInput
-            style={[
+            style={[ 
               styles.input,
               {
                 backgroundColor: colors.BG_PRIMARY,
@@ -322,7 +339,7 @@ export default function ChatAssistant() {
             maxLength={500}
           />
           <TouchableOpacity
-            style={[
+            style={[ 
               styles.sendButton,
               {
                 backgroundColor:
