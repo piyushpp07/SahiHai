@@ -58,20 +58,24 @@ export default function Home() {
                 </Pressable>
              </Link>
 
-             {/* Placeholder for future features */}
-             <Pressable className="bg-white w-[48%] aspect-square rounded-2xl p-4 justify-between mb-4 border border-gray-100 shadow-sm">
-                 <View className="bg-gray-100 w-10 h-10 rounded-full items-center justify-center">
-                    <Text className="text-2xl">🚗</Text>
-                 </View>
-                 <Text className="text-gray-800 font-bold text-lg">Challan</Text>
-             </Pressable>
+             <Link href="/utilities/challan" asChild>
+                <Pressable className="bg-white w-[48%] aspect-square rounded-2xl p-4 justify-between mb-4 border border-gray-100 shadow-sm active:bg-gray-50">
+                    <View className="bg-gray-100 w-10 h-10 rounded-full items-center justify-center">
+                        <Text className="text-2xl">🚗</Text>
+                    </View>
+                    <Text className="text-gray-800 font-bold text-lg">Challan</Text>
+                </Pressable>
+             </Link>
 
-             <Pressable className="bg-white w-[48%] aspect-square rounded-2xl p-4 justify-between mb-4 border border-gray-100 shadow-sm">
-                 <View className="bg-gray-100 w-10 h-10 rounded-full items-center justify-center">
-                    <Text className="text-2xl">🚆</Text>
-                 </View>
-                 <Text className="text-gray-800 font-bold text-lg">PNR</Text>
-             </Pressable>
+             <Link href="/utilities/pnr" asChild>
+                <Pressable className="bg-white w-[48%] aspect-square rounded-2xl p-4 justify-between mb-4 border border-gray-100 shadow-sm active:bg-gray-50">
+                    <View className="bg-gray-100 w-10 h-10 rounded-full items-center justify-center">
+                        <Text className="text-2xl">🚆</Text>
+                    </View>
+                    <Text className="text-gray-800 font-bold text-lg">PNR</Text>
+                </Pressable>
+             </Link>
+
         </View>
 
       </ScrollView>

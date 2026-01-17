@@ -1,33 +1,33 @@
 import mongoose from 'mongoose';
+import { env } from '../../config/env';
 import logger from '../../logging/logger';
 
-let isConnected = false;
+export class MongoConnection {
+  private static isConnected = false;
 
-export const connectDatabase = async () => {
-  if (isConnected) {
-    return;
+  public static async connect(): Promise<void> {
+    if (this.isConnected) return;
+
+    // Use mongoose.connection.readyState as a double check
+    if (mongoose.connection.readyState === 1) {
+      this.isConnected = true;
+      return;
+    }
+
+    try {
+      await mongoose.connect(env.MONGODB_URI);
+      this.isConnected = true;
+      logger.info('Connected to MongoDB');
+    } catch (error) {
+      logger.error('MongoDB connection error:', error);
+      throw error;
+    }
   }
 
-  // Check if mongoose already has a connection (e.g. from previous serverless invocation)
-  if (mongoose.connection.readyState === 1) {
-    isConnected = true;
-    return;
+  public static async disconnect(): Promise<void> {
+    if (!this.isConnected) return;
+    await mongoose.disconnect();
+    this.isConnected = false;
+    logger.info('Disconnected from MongoDB');
   }
-
-  const uri = process.env.MONGODB_URI;
-  if (!uri) {
-    logger.error('MONGODB_URI is not defined in environment variables');
-    // Don't exit process in serverless, just throw
-    throw new Error('MONGODB_URI is missing');
-  }
-
-  try {
-    await mongoose.connect(uri);
-    isConnected = true;
-    logger.info('Connected to MongoDB');
-  } catch (error) {
-    logger.error('MongoDB connection error:', error);
-    throw error;
-  }
-};
-
+}
