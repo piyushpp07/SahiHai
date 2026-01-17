@@ -8,7 +8,7 @@ const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_KEY || "");
 const geminiModel = genAI.getGenerativeModel({
-  model: "gemini-1.5-flash-latest",
+  model: "gemini-1.5-flash",
 });
 
 // Logger utility
@@ -126,7 +126,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
     // Try Groq first
     if (process.env.GROQ_API_KEY) {
       try {
-        logger.info("Attempting Groq API call (gemma-7b-it)");
+        logger.info("Attempting Groq API call (llama-3.1-8b-instant)");
         const groqMessages = [...messages];
         if (file) {
             let base64Image: string;
@@ -142,7 +142,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
         }
         const chatCompletion = await groq.chat.completions.create({
           messages: groqMessages,
-          model: "gemma-7b-it",
+          model: "llama-3.1-8b-instant",
           temperature: 0.5,
           max_tokens: 1024,
         });
@@ -152,7 +152,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
           replyLength: reply?.length,
         });
       } catch (groqError: any) {
-        logger.warn("gemma-7b-it failed, trying fallback model", {
+        logger.warn("llama-3.1-8b-instant failed, trying fallback model", {
           error: groqError.message,
         });
         // ... (fallback logic remains the same, but without image support for now)
@@ -162,7 +162,7 @@ export const consultAssistant = async (req: Request, res: Response) => {
     // Fallback to Gemini if Groq fails or is not configured
     if (!reply && process.env.GEMINI_KEY) {
       try {
-        logger.info("Attempting Gemini API call (gemini-1.5-flash-latest)");
+        logger.info("Attempting Gemini API call (gemini-1.5-flash)");
         const content: (string | Part)[] = [systemPrompt, `User: ${userMessage}`];
         if (imagePart) {
             content.push(imagePart);
@@ -199,6 +199,11 @@ export const consultAssistant = async (req: Request, res: Response) => {
                   replyLength: reply?.length,
                 });
               } catch (openaiError: any) {
+                if (openaiError?.status === 429) {
+                  logger.error(
+                    "❌ OpenAI API request failed due to quota exceeded. Please check your plan and billing details on the OpenAI website."
+                  );
+                }
                 logger.error("❌ OpenAI API failed:", {
                   message: openaiError?.message,
                   status: openaiError?.status,
