@@ -40,6 +40,7 @@ app.get('/health', (req, res) => {
 });
 
 export { app, connectDatabase };
+export default app;
 
 
 

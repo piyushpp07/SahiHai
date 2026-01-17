@@ -17,8 +17,8 @@ export default function Login() {
         setLoading(true);
         try {
             await signIn(email, password);
-        } catch (e) {
-            Alert.alert("Login Failed", "Invalid credentials");
+        } catch (e: any) {
+            Alert.alert("Login Failed", e.message || "Invalid credentials");
         } finally {
             setLoading(false);
         }
