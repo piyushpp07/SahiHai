@@ -10,20 +10,14 @@ interface Challan {
   status: 'PENDING' | 'PAID';
 }
 
+import api from '../lib/api';
+
 // Mock API Call
 const fetchChallans = async (vehicleNumber: string): Promise<Challan[]> => {
-  // Simulate network delay
-  await new Promise(resolve => setTimeout(resolve, 1500));
-  
-  // Mock response based on input
-  if (vehicleNumber === 'MH12AB1234') {
-    return [
-      { id: 'CH1', vehicleNumber, amount: 500, violation: 'Signal Jump', date: '2025-01-10', status: 'PENDING' },
-      { id: 'CH2', vehicleNumber, amount: 200, violation: 'No Parking', date: '2024-12-25', status: 'PAID' },
-    ];
-  }
-  return [];
+  const { data } = await api.get(`/utilities/challan/${vehicleNumber}`);
+  return data;
 };
+
 
 export const useChallan = (vehicleNumber: string) => {
   return useQuery({

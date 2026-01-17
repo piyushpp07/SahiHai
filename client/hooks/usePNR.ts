@@ -8,17 +8,13 @@ interface PNRStatus {
     probability?: number;
 }
 
+import api from '../lib/api';
+
 const fetchPNR = async (pnr: string): Promise<PNRStatus> => {
-    // Mock
-    await new Promise(r => setTimeout(r, 1000));
-    return {
-        pnr,
-        trainName: 'Rajdhani Express',
-        date: '2025-02-20',
-        status: 'WL',
-        probability: 85
-    }
+    const { data } = await api.get(`/utilities/pnr/${pnr}`);
+    return data;
 }
+
 
 export const usePNR = (pnr: string) => {
     return useQuery({

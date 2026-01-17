@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
+import api from '../lib/api';
 
 interface Message {
   id: string;
@@ -8,7 +8,7 @@ interface Message {
   timestamp: Date;
 }
 
-const API_URL = process.env.EXPO_PUBLIC_API_URL || 'http://localhost:3000';
+
 
 export const useChat = (chatId: string) => {
   const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ export const useChat = (chatId: string) => {
 
   const sendMessageMutation = useMutation({
     mutationFn: async (text: string) => {
-      const { data } = await axios.post(`${API_URL}/chat/${chatId}/message`, { 
+      const { data } = await api.post(`/chat/${chatId}/message`, { 
           text,
           provider: 'openai' // Default for now
       });

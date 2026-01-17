@@ -13,7 +13,7 @@ export const GoldRateWidget = () => {
 
     return (
         <View className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-            <Text className="text-yellow-800 font-bold text-lg mb-2">Today's Gold Rates (10g)</Text>
+            <Text className="text-yellow-800 font-bold text-lg mb-2">Today&apos;s Gold Rates (10g)</Text>
             <View className="flex-row justify-between">
                 <View>
                     <Text className="text-gray-500 text-xs">24K Pure</Text>

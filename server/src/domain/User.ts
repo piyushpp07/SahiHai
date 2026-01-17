@@ -1,9 +1,12 @@
 export interface User {
   id: string;
-  phoneNumber: string;
-  name?: string;
-  preferredLanguage?: string;
-  createdAt: Date;
-  updatedAt: Date;
-  metadata?: Record<string, any>;
+  email: string;
+  name: string;
+  phoneNumber?: string;
+  preferences: {
+      language: string;
+      theme: string;
+  };
+  createdAt?: Date;
+  updatedAt?: Date;
 }

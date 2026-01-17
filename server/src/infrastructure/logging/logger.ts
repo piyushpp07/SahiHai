@@ -7,27 +7,33 @@ const logFormat = winston.format.combine(
   winston.format.json()
 );
 
-const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
-  filename: 'logs/application-%DATE%.log',
-  datePattern: 'YYYY-MM-DD',
-  zippedArchive: true,
-  maxSize: '20m',
-  maxFiles: '14d',
-  dirname: path.join(process.cwd(), 'logs')
-});
+const isVercel = process.env.VERCEL === '1';
+
+const transports: winston.transport[] = [
+  new winston.transports.Console({
+    format: winston.format.combine(
+      winston.format.colorize(),
+      winston.format.simple()
+    )
+  })
+];
+
+if (!isVercel) {
+  const dailyRotateFileTransport = new winston.transports.DailyRotateFile({
+    filename: 'logs/application-%DATE%.log',
+    datePattern: 'YYYY-MM-DD',
+    zippedArchive: true,
+    maxSize: '20m',
+    maxFiles: '14d',
+    dirname: path.join(process.cwd(), 'logs')
+  });
+  transports.push(dailyRotateFileTransport);
+}
 
 const logger = winston.createLogger({
   level: process.env.LOG_LEVEL || 'info',
   format: logFormat,
-  transports: [
-    dailyRotateFileTransport,
-    new winston.transports.Console({
-      format: winston.format.combine(
-        winston.format.colorize(),
-        winston.format.simple()
-      )
-    })
-  ]
+  transports: transports
 });
 
 export default logger;

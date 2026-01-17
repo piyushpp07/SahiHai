@@ -20,9 +20,15 @@ const startCluster = async () => {
     }
   });
 
-  // Sticky Session Logic
-  // sticky-session helps balance requests based on IP to the same worker
-  // Note: sticky-session creates the workers for us.
+  // Skip clustering on Vercel (Serverless)
+  if (process.env.VERCEL === '1') {
+    server.listen(port, () => {
+        logger.info(`Server running on Vercel at port ${port}`);
+    });
+    return;
+  }
+
+  // Sticky Session Logic for local/cluster mode
   const isMaster = !sticky.listen(server, port);
 
   if (isMaster) {
@@ -30,6 +36,7 @@ const startCluster = async () => {
   } else {
     logger.info(`Worker process ${process.pid} started`);
   }
+
   
   // Basic socket logic to verify connection
   io.on('connection', (socket) => {
