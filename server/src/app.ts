@@ -11,6 +11,17 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Database Connection Middleware (Ensures connection on Vercel)
+app.use(async (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    try {
+        await connectDatabase();
+        next();
+    } catch (error) {
+        logger.error('Failed to connect to database during request:', error);
+        res.status(500).json({ error: 'Database connection failed' });
+    }
+});
+
 // Middleware
 app.use(helmet());
 app.use(cors({
