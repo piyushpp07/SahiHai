@@ -44,28 +44,64 @@ export class UtilityService {
 
     async getChallan(vehicleNumber: string): Promise<Challan[]> {
         const normalized = vehicleNumber.toUpperCase().replace(/\s/g, '');
-        // Real logic would query RTO database
-        if (normalized === 'MH12AB1234' || normalized === 'DL3CAS5678') {
-            return [
-              { 
-                id: 'CH-2025-001', 
-                vehicleNumber: normalized, 
-                amount: 1000, 
-                violation: 'Over Speeding (65km/h in 40km/h zone)', 
-                date: '2025-01-12', 
-                status: 'PENDING' 
-              },
-              { 
-                id: 'CH-2024-942', 
-                vehicleNumber: normalized, 
-                amount: 500, 
-                violation: 'No Helmet', 
-                date: '2024-12-05', 
-                status: 'PAID' 
-              },
-            ];
+        try {
+            const config = {
+                headers: {
+                    'x-api-key': env.APICLUB_KEY,
+                    'Content-Type': 'application/json'
+                }
+            };
+
+            const url = `https://uat.apiclub.in/api/v1/challan_info/${normalized}`;
+            const response = await axios.get(url, config);
+            const data = response.data;
+
+            if (data.status === 'error' || !data.response || !Array.isArray(data.response.challans)) {
+                // If it's a specific vehicle check in demo mode
+                if (normalized === 'MH12AB1234' || normalized === 'DL3CAS5678') {
+                    return this.getMockChallans(normalized);
+                }
+                return [];
+            }
+
+            // Map API response to our Challan interface
+            return data.response.challans.map((c: any) => ({
+                id: c.challan_number || Math.random().toString(36).substr(2, 9),
+                vehicleNumber: normalized,
+                amount: parseFloat(c.amount) || 0,
+                violation: c.offense || 'General Violation',
+                date: c.challan_date || new Date().toISOString().split('T')[0],
+                status: c.status?.toUpperCase() === 'CASH' ? 'PAID' : 'PENDING'
+            }));
+
+        } catch (error) {
+            console.error('Error fetching live Challan status:', error);
+            if (normalized === 'MH12AB1234' || normalized === 'DL3CAS5678') {
+                return this.getMockChallans(normalized);
+            }
+            return [];
         }
-        return [];
+    }
+
+    private getMockChallans(vehicleNumber: string): Challan[] {
+        return [
+          { 
+            id: 'CH-2025-001', 
+            vehicleNumber, 
+            amount: 1000, 
+            violation: 'Over Speeding (65km/h in 40km/h zone)', 
+            date: '2025-01-12', 
+            status: 'PENDING' 
+          },
+          { 
+            id: 'CH-2024-942', 
+            vehicleNumber, 
+            amount: 500, 
+            violation: 'No Helmet', 
+            date: '2024-12-05', 
+            status: 'PAID' 
+          },
+        ];
     }
 
     async getPNRStatus(pnr: string): Promise<PNRStatus> {
