@@ -3,6 +3,7 @@ import { BaseMessage } from "@langchain/core/messages";
 export type LLMProvider = 'openai' | 'gemini';
 
 export interface ChatMessage {
+  id?: string;
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;

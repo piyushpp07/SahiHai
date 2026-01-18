@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react';
+import { useRouter } from 'expo-router';
 import { View, Text, Pressable, FlatList, KeyboardAvoidingView, Platform, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -20,6 +21,7 @@ interface Message {
 }
 
 export default function ChatScreen() {
+  const router = useRouter();
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [inputText, setInputText] = useState('');
@@ -105,6 +107,12 @@ export default function ChatScreen() {
           <SafeAreaView className="flex-1" edges={['top']}>
             <View className="px-4 py-6 flex-row items-center justify-between border-b border-gray-100">
                 <View className="flex-row items-center">
+                    <Pressable 
+                        onPress={() => router.back()}
+                        className="mr-3 p-1 rounded-full bg-gray-50 active:bg-gray-100"
+                    >
+                        <Ionicons name="chevron-back" size={24} color="#374151" />
+                    </Pressable>
                     <View className="shadow-lg shadow-indigo-300">
                         <LinearGradient colors={['#4F46E5', '#3730A3']} className="w-10 h-10 rounded-[16px] items-center justify-center mr-4">
                             <Ionicons name="sparkles" size={20} color="white" />

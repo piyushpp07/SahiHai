@@ -44,19 +44,15 @@ export class ChatService {
         const replyText = lastMessage.content.toString();
 
         // 4. Update Session History
-        const userMsg = { text, sender: 'user' as const, timestamp: new Date(), image };
-        const botMsg = { text: replyText, sender: 'bot' as const, timestamp: new Date() };
+        const userMsg = { id: Date.now().toString(), text, sender: 'user' as const, timestamp: new Date(), image };
+        const botMsg = { id: (Date.now() + 1).toString(), text: replyText, sender: 'bot' as const, timestamp: new Date() };
 
         await ChatSessionModel.findOneAndUpdate(
             { threadId: chatId },
             { $push: { history: { $each: [userMsg, botMsg] } } }
         );
 
-        return {
-            text: replyText,
-            sender: 'bot',
-            timestamp: new Date()
-        };
+        return botMsg;
 
     }
 

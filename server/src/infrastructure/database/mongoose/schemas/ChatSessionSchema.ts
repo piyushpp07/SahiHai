@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import { ChatSession, ChatMessage } from '../../../../domain/entities/ChatSession';
 
 const ChatMessageSchema = new Schema<ChatMessage>({
+  id: { type: String, required: false },
   text: { type: String, required: true },
   sender: { type: String, enum: ['user', 'bot'], required: true },
   timestamp: { type: Date, default: Date.now },
