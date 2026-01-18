@@ -66,7 +66,7 @@ const getModel = (provider: LLMProvider) => {
   return model.bindTools(tools);
 };
 
-import { ToolNode } from "@langchain/langgraph/dist/prebuilt/index.js";
+import { ToolNode } from "@langchain/langgraph/prebuilt";
 
 // Node: Call Model
 const callModel = async (state: typeof AgentState.State) => {
