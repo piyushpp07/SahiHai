@@ -1,5 +1,5 @@
 import { ChatOpenAI } from "@langchain/openai";
-import { ChatAnthropic } from "@langchain/anthropic";
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { DynamicTool } from "@langchain/core/tools";
 import { StateGraph, END } from "@langchain/langgraph";
 import { BaseMessage, HumanMessage, AIMessage } from "@langchain/core/messages";
@@ -29,7 +29,7 @@ const callModel = async (state: AgentState) => {
   if (provider === 'gpt-4o' || provider === 'openai') {
     model = new ChatOpenAI({ modelName: "gpt-4o", apiKey: env.OPENAI_API_KEY });
   } else {
-    model = new ChatAnthropic({ modelName: "claude-3-haiku-20240307", apiKey: env.ANTHROPIC_API_KEY });
+    model = new ChatGoogleGenerativeAI({ model: "gemini-1.5-flash", apiKey: env.GEMINI_KEY });
   }
 
   const response = await model.invoke(messages);

@@ -4,12 +4,14 @@ import dotenv from 'dotenv';
 dotenv.config();
 
 const configSchema = z.object({
-  PORT: z.string().default('3000'),
+  PORT: z.string().default('5051'),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  MONGODB_URI: z.string().url(),
-  SESSION_SECRET: z.string().min(16),
+  MONGODB_URI: z.string().min(1),
+  SESSION_SECRET: z.string().default('sahihai-default-session-secret-key-2026'),
+  JWT_SECRET: z.string().default('sahihai-default-jwt-secret-key-2026'),
   OPENAI_API_KEY: z.string().optional(),
-  ANTHROPIC_API_KEY: z.string().optional(),
+  GEMINI_KEY: z.string().optional(),
+  GROQ_API_KEY: z.string().optional(),
   TAVILY_API_KEY: z.string().optional(),
 });
 

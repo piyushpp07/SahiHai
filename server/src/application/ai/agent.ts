@@ -1,6 +1,7 @@
+import { env } from "../../config/env";
 import { ChatOpenAI } from "@langchain/openai";
 import { ChatAnthropic } from "@langchain/anthropic";
-// import { ChatGoogleGenerativeAI } from "@langchain/google-genai"; // For Gemini
+import { ChatGoogleGenerativeAI } from "@langchain/google-genai";
 import { StateGraph, END, Annotation } from "@langchain/langgraph";
 import { BaseMessage } from "@langchain/core/messages";
 import { LLMProvider } from "../../domain/ChatSession";
@@ -13,7 +14,7 @@ const AgentState = Annotation.Root({
   }),
   provider: Annotation<LLMProvider>({
     reducer: (x, y) => y ?? x,
-    default: () => 'openai',
+    default: () => 'gemini', // Default to Gemini
   }),
 });
 
@@ -23,11 +24,12 @@ const getModel = (provider: LLMProvider) => {
     case 'openai':
       return new ChatOpenAI({ modelName: "gpt-4o" });
     case 'anthropic':
-      return new ChatAnthropic({ modelName: "claude-3-opus-20240229" });
+      // Use Gemini as fallback for Anthropic if requested but we want to save "monty"
+      return new ChatGoogleGenerativeAI({ model: "gemini-1.5-pro", apiKey: env.GEMINI_KEY });
     case 'gemini':
-       return new ChatOpenAI({ modelName: "gpt-3.5-turbo" }); // Fallback
+       return new ChatGoogleGenerativeAI({ model: "gemini-1.5-pro", apiKey: env.GEMINI_KEY });
     default:
-      return new ChatOpenAI({ modelName: "gpt-3.5-turbo" });
+      return new ChatGoogleGenerativeAI({ model: "gemini-1.5-flash", apiKey: env.GEMINI_KEY });
   }
 };
 

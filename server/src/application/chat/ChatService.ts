@@ -15,7 +15,7 @@ export class ChatService {
                 threadId: chatId,
                 userId: userId,
                 history: [],
-                provider: 'openai'
+                provider: 'gemini'
             });
         }
 
@@ -27,7 +27,7 @@ export class ChatService {
         // 3. Invoke Agent
         const inputs = {
             messages: [...history, new HumanMessage(text)],
-            provider: session.provider || 'openai'
+            provider: session.provider || 'gemini'
         };
 
         const response = await this.agent.invoke(inputs);
