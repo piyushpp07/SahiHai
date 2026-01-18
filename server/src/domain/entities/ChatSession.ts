@@ -6,6 +6,7 @@ export interface ChatMessage {
   text: string;
   sender: 'user' | 'bot';
   timestamp: Date;
+  image?: string; // Base64 or URL
 }
 
 export interface ChatSession {

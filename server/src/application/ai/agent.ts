@@ -66,20 +66,58 @@ const getModel = (provider: LLMProvider) => {
   return model.bindTools(tools);
 };
 
+import { ToolNode } from "@langchain/langgraph/dist/prebuilt/index.js";
+
 // Node: Call Model
 const callModel = async (state: typeof AgentState.State) => {
   const { messages, provider } = state;
   const model = getModel(provider);
-  const response = await model.invoke(messages);
+
+  // Convert messages to include images if present (for Gemini/multi-modal)
+  const formattedMessages = messages.map(msg => {
+    if ((msg as any).image) {
+        return {
+            role: (msg as any).sender === 'user' ? 'user' : 'assistant',
+            content: [
+                { type: 'text', text: msg.content },
+                {
+                    type: 'image_url',
+                    image_url: { url: (msg as any).image.startsWith('data:') ? (msg as any).image : `data:image/jpeg;base64,${(msg as any).image}` }
+                }
+            ]
+        };
+    }
+    return msg;
+  });
+
+  const response = await model.invoke(formattedMessages as any);
   return { messages: [response] };
+};
+
+// Tool Node
+const toolNode = new ToolNode(tools);
+
+// Conditional edge to decide whether to continue or end
+const shouldContinue = (state: typeof AgentState.State) => {
+    const { messages } = state;
+    const lastMessage = messages[messages.length - 1];
+    
+    // If the LLM is calling tools, route to the "tools" node
+    if ((lastMessage as any).tool_calls?.length > 0) {
+        return "tools";
+    }
+    // Otherwise, stop (reply to the user)
+    return END;
 };
 
 // Build the graph
 export const createAgent = () => {
     const workflow = new StateGraph(AgentState)
-        .addNode("agent", callModel)
+        .addNode("agent", callModel as any)
+        .addNode("tools", toolNode as any)
         .addEdge("__start__", "agent")
-        .addEdge("agent", END);
+        .addConditionalEdges("agent", shouldContinue as any)
+        .addEdge("tools", "agent");
 
     return workflow.compile();
 }

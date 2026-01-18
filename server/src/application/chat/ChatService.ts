@@ -6,7 +6,7 @@ import { ChatMessage as Message } from '../../domain/entities/ChatSession';
 export class ChatService {
     private agent = createAgent();
 
-    async processMessage(chatId: string, text: string, userId: string = 'guest'): Promise<Message> {
+    async processMessage(chatId: string, text: string, userId: string = 'guest', image?: string): Promise<Message> {
         // 1. Fetch or Create Session
         let session = await ChatSessionModel.findOne({ threadId: chatId });
         
@@ -24,13 +24,18 @@ export class ChatService {
         }
 
         // 2. Prepare History for Agent
-        const history = session.history.map((msg: any) => 
-            msg.sender === 'user' ? new HumanMessage(msg.text) : new AIMessage(msg.text)
-        );
+        const history = session.history.map((msg: any) => {
+            const m = msg.sender === 'user' ? new HumanMessage(msg.text) : new AIMessage(msg.text);
+            if (msg.image) (m as any).image = msg.image;
+            return m;
+        });
 
         // 3. Invoke Agent
+        const newUserMsg = new HumanMessage(text);
+        if (image) (newUserMsg as any).image = image;
+
         const inputs = {
-            messages: [...history, new HumanMessage(text)],
+            messages: [...history, newUserMsg],
             provider: session.provider || 'gemini'
         };
 
@@ -39,7 +44,7 @@ export class ChatService {
         const replyText = lastMessage.content.toString();
 
         // 4. Update Session History
-        const userMsg = { text, sender: 'user' as const, timestamp: new Date() };
+        const userMsg = { text, sender: 'user' as const, timestamp: new Date(), image };
         const botMsg = { text: replyText, sender: 'bot' as const, timestamp: new Date() };
 
         await ChatSessionModel.findOneAndUpdate(

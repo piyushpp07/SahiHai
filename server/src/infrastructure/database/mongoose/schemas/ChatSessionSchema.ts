@@ -5,6 +5,7 @@ const ChatMessageSchema = new Schema<ChatMessage>({
   text: { type: String, required: true },
   sender: { type: String, enum: ['user', 'bot'], required: true },
   timestamp: { type: Date, default: Date.now },
+  image: { type: String, required: false },
 });
 
 export const ChatSessionSchema = new Schema<ChatSession>({

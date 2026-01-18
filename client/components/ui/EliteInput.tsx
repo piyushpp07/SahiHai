@@ -1,5 +1,4 @@
-import React from 'react';
-import { View, TextInput, TextInputProps, ViewStyle } from 'react-native';
+import { View, TextInput, TextInputProps, ViewStyle, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { GlassCard } from './GlassCard';
 
@@ -8,6 +7,7 @@ interface EliteInputProps extends TextInputProps {
   iconColor?: string;
   containerStyle?: ViewStyle;
   rightElement?: React.ReactNode;
+  onIconPress?: () => void;
 }
 
 export const EliteInput: React.FC<EliteInputProps> = ({ 
@@ -15,6 +15,7 @@ export const EliteInput: React.FC<EliteInputProps> = ({
   iconColor = '#9CA3AF', 
   containerStyle, 
   rightElement,
+  onIconPress,
   ...props 
 }) => {
   return (
@@ -25,9 +26,9 @@ export const EliteInput: React.FC<EliteInputProps> = ({
         style={{ height: 72 }} // Balanced Elite Height
       >
         {icon && (
-          <View className="mr-4">
+          <Pressable onPress={onIconPress} disabled={!onIconPress} className="mr-4">
             <Ionicons name={icon} size={28} color={iconColor} />
-          </View>
+          </Pressable>
         )}
         
         <TextInput
