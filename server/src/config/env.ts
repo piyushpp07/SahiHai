@@ -13,6 +13,8 @@ const configSchema = z.object({
   GEMINI_KEY: z.string().optional(),
   GROQ_API_KEY: z.string().optional(),
   TAVILY_API_KEY: z.string().optional(),
+  GOLD_API_KEY: z.string().optional(),
+  APICLUB_KEY: z.string().optional(),
 });
 
 const parsed = configSchema.safeParse(process.env);
