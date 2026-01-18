@@ -3,16 +3,14 @@ import { View, Text } from 'react-native';
 import { Canvas, Path, LinearGradient, vec, Skia } from '@shopify/react-native-skia';
 import Animated, { 
   useSharedValue, 
-  useAnimatedProps, 
   withTiming, 
   withRepeat, 
   withSequence,
   useAnimatedStyle,
+  useDerivedValue,
   Easing 
 } from 'react-native-reanimated';
 import { GlassCard } from './GlassCard';
-
-const AnimatedPath = Animated.createAnimatedComponent(Path);
 
 export const Lootmeter = () => {
   const progress = useSharedValue(0);
@@ -36,14 +34,12 @@ export const Lootmeter = () => {
     );
   }, []);
 
-  const animatedProps = useAnimatedProps(() => {
-    const radius = 80;
+  const animatedPath = useDerivedValue(() => {
     const path = Skia.Path.Make();
     // Semi-circle arc: from left (180 deg) to right (0 deg)
-    path.addArc({ x: 10, y: 10, width: 160, height: 160 }, 180, 180 * progress.value);
-    return {
-      path: path,
-    };
+    const sweep = 180 * progress.value;
+    path.addArc({ x: 10, y: 10, width: 160, height: 160 }, 180, Math.max(sweep, 0.1));
+    return path;
   });
 
   const backgroundPath = Skia.Path.Make();
@@ -71,9 +67,8 @@ export const Lootmeter = () => {
                 />
                 
                 {/* Animated Progress Arc */}
-                <AnimatedPath
-                    path={Skia.Path.Make()}
-                    animatedProps={animatedProps}
+                <Path
+                    path={animatedPath}
                     style="stroke"
                     strokeWidth={16}
                     strokeCap="round"
@@ -83,7 +78,7 @@ export const Lootmeter = () => {
                         end={vec(180, 0)}
                         colors={["#4F46E5", "#EF4444"]}
                     />
-                </AnimatedPath>
+                </Path>
              </Canvas>
 
              <View className="absolute bottom-2 items-center">
