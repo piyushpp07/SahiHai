@@ -7,7 +7,9 @@ export class RedisConnection {
 
   private constructor() {}
 
-  public static getInstance(): Redis {
+  public static getInstance(): Redis | null {
+    if (!env.REDIS_URL) return null;
+    
     if (!RedisConnection.instance) {
       RedisConnection.instance = new Redis(env.REDIS_URL, {
         retryStrategy: (times) => {
@@ -15,11 +17,7 @@ export class RedisConnection {
           return delay;
         },
       });
-
-      RedisConnection.instance.on('connect', () => {
-        logger.info('Connected to Redis');
-      });
-
+// ...
       RedisConnection.instance.on('error', (err) => {
         logger.error('Redis connection error:', err);
       });

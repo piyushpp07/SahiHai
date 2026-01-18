@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import { useChallan } from '../../hooks/useChallan';
 import { Ionicons } from '@expo/vector-icons';
-import { GlassCard } from '../../components/ui/GlassCard';
 import { LinearGradient } from 'expo-linear-gradient';
+import { EliteInput } from '../../components/ui/EliteInput';
 
 export default function ChallanScreen() {
     const [vehicleNumber, setVehicleNumber] = useState('');
@@ -21,51 +21,43 @@ export default function ChallanScreen() {
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
             <Stack.Screen options={{ title: 'Legal & Compliance', headerShadowVisible: false }} />
             
-            <View className="px-6 pt-4 pb-12">
+            <View className="px-4 pt-4 pb-12">
                 <Text className="text-gray-400 font-bold text-[10px] uppercase tracking-[2px] mb-3">Legal & Compliance</Text>
-                <Text className="text-4xl font-black text-gray-900 mb-8 leading-tight">Verify{"\n"}Challans</Text>
+                <Text className="text-2xl font-black text-gray-900 mb-8 leading-tight">Verify{"\n"}Challans</Text>
                 
-                <View className="shadow-2xl shadow-red-200">
-                    <GlassCard intensity={45} className="bg-white/95 border-white/80 flex-row items-center p-2 rounded-[36px]">
-                        <View className="pl-6 mr-4">
-                            <Ionicons name="car" size={24} color="#ef4444" />
-                        </View>
-                        <TextInput 
-                            className="flex-1 text-2xl font-black h-16"
-                            style={{ color: '#111827', textAlignVertical: 'center' }}
-                            placeholder="MH12AB1234"
-                            placeholderTextColor="#9CA3AF"
-                            selectionColor="#ef4444"
-                            value={vehicleNumber}
-                            onChangeText={setVehicleNumber}
-                            autoCapitalize="characters"
-                        />
+                <EliteInput
+                    icon="car"
+                    iconColor="#ef4444"
+                    placeholder="MH12AB1234"
+                    value={vehicleNumber}
+                    onChangeText={setVehicleNumber}
+                    autoCapitalize="characters"
+                    rightElement={
                         <Pressable 
                             onPress={handleSearch}
                             style={({ pressed }) => [{
                                 opacity: pressed ? 0.9 : 1,
                                 transform: [{ scale: pressed ? 0.94 : 1 }],
-                                flexShrink: 0
                             }]}
                         >
                             <LinearGradient
                                 colors={['#ef4444', '#b91c1c']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
-                                className="w-16 h-16 rounded-[28px] items-center justify-center shadow-lg shadow-red-400"
+                                className="w-14 h-14 rounded-[22px] items-center justify-center shadow-lg shadow-red-400"
                             >
-                                <Ionicons name="chevron-forward" size={30} color="white" />
+                                <Ionicons name="chevron-forward" size={24} color="white" />
                             </LinearGradient>
                         </Pressable>
-                    </GlassCard>
-                </View>
+                    }
+                />
             </View>
 
-            <ScrollView className="flex-1 px-6">
+            <ScrollView className="flex-1 px-4">
                 {isLoading && <ActivityIndicator size="large" color="#ef4444" className="mt-10" />}
                 
                 {challans && challans.length > 0 ? (
-                    challans.map((challan) => (
+                    challans.map((challan: any) => (
                         <View key={challan.id} className="mb-6">
                             <LinearGradient
                                 colors={['#FFFFFF', '#F9FAFB']}
@@ -78,7 +70,7 @@ export default function ChallanScreen() {
                                     <Text className="text-gray-300 font-bold text-[10px]">{challan.id}</Text>
                                 </View>
                                 
-                                <Text className="text-3xl font-black text-gray-900">₹{challan.amount}</Text>
+                                <Text className="text-xl font-black text-gray-900">₹{challan.amount}</Text>
                                 <Text className="text-gray-600 font-medium mb-6 mt-1">{challan.violation}</Text>
                                 
                                 <View className="flex-row justify-between items-center pt-6 border-t border-gray-50">

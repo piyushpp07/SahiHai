@@ -1,11 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Stack } from 'expo-router';
 import { usePNR } from '../../hooks/usePNR';
 import { Ionicons } from '@expo/vector-icons';
-import { GlassCard } from '../../components/ui/GlassCard';
 import { LinearGradient } from 'expo-linear-gradient';
+import { EliteInput } from '../../components/ui/EliteInput';
 
 export default function PNRScreen() {
     const [pnr, setPnr] = useState('');
@@ -21,48 +21,40 @@ export default function PNRScreen() {
         <SafeAreaView className="flex-1 bg-white" edges={['top']}>
             <Stack.Screen options={{ title: 'Transit Center', headerShadowVisible: false }} />
             
-            <View className="px-6 pt-4 pb-12">
+            <View className="px-4 pt-4 pb-12">
                 <Text className="text-gray-400 font-bold text-[10px] uppercase tracking-[2px] mb-3">Railways Intelligence</Text>
-                <Text className="text-4xl font-black text-gray-900 mb-8 leading-tight">Check PNR{"\n"}Status</Text>
+                <Text className="text-2xl font-black text-gray-900 mb-8 leading-tight">Check PNR{"\n"}Status</Text>
                 
-                <View className="shadow-2xl shadow-blue-200">
-                    <GlassCard intensity={45} className="bg-white/95 border-white/80 flex-row items-center p-2 rounded-[36px]">
-                        <View className="pl-6 mr-4">
-                            <Ionicons name="ticket" size={24} color="#2563eb" />
-                        </View>
-                        <TextInput 
-                            className="flex-1 text-2xl font-black h-16"
-                            style={{ color: '#111827', textAlignVertical: 'center' }}
-                            placeholder="10-digit PNR"
-                            placeholderTextColor="#9CA3AF"
-                            selectionColor="#2563eb"
-                            value={pnr}
-                            onChangeText={setPnr}
-                            keyboardType="number-pad"
-                            maxLength={10}
-                        />
+                <EliteInput
+                    icon="ticket"
+                    iconColor="#2563eb"
+                    placeholder="10-digit PNR"
+                    value={pnr}
+                    onChangeText={setPnr}
+                    keyboardType="number-pad"
+                    maxLength={10}
+                    rightElement={
                         <Pressable 
                             onPress={handleSearch}
                             style={({ pressed }) => [{
                                 opacity: pressed ? 0.9 : 1,
                                 transform: [{ scale: pressed ? 0.94 : 1 }],
-                                flexShrink: 0
                             }]}
                         >
                             <LinearGradient
                                 colors={['#3B82F6', '#1E4ED8']}
                                 start={{ x: 0, y: 0 }}
                                 end={{ x: 1, y: 1 }}
-                                className="w-16 h-16 rounded-[28px] items-center justify-center shadow-lg shadow-blue-400"
+                                className="w-14 h-14 rounded-[22px] items-center justify-center shadow-lg shadow-blue-400"
                             >
-                                <Ionicons name="chevron-forward" size={30} color="white" />
+                                <Ionicons name="chevron-forward" size={24} color="white" />
                             </LinearGradient>
                         </Pressable>
-                    </GlassCard>
-                </View>
+                    }
+                />
             </View>
 
-            <ScrollView className="flex-1 px-6">
+            <ScrollView className="flex-1 px-4">
                 {isLoading && <ActivityIndicator size="large" color="#2563eb" className="mt-10" />}
                 
                 {status ? (
@@ -74,7 +66,7 @@ export default function PNRScreen() {
                             <View className="flex-row justify-between items-start mb-10">
                                 <View>
                                     <Text className="text-blue-400 text-xs font-bold uppercase tracking-widest mb-1">Status</Text>
-                                    <Text className="text-white text-5xl font-black">{status.status}</Text>
+                                    <Text className="text-white text-3xl font-black">{(status as any).status}</Text>
                                 </View>
                                 <Ionicons name="train" size={40} color="white" />
                             </View>
@@ -82,22 +74,22 @@ export default function PNRScreen() {
                             <View className="flex-row justify-between mb-8">
                                 <View className="flex-1">
                                     <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1">Train</Text>
-                                    <Text className="text-white font-bold text-lg" numberOfLines={1}>{status.trainName}</Text>
+                                    <Text className="text-white font-bold text-lg" numberOfLines={1}>{(status as any).trainName}</Text>
                                 </View>
                                 <View className="items-end">
                                     <Text className="text-gray-500 text-[10px] font-bold uppercase mb-1">Date</Text>
-                                    <Text className="text-white font-bold text-lg">{status.date}</Text>
+                                    <Text className="text-white font-bold text-lg">{(status as any).date}</Text>
                                 </View>
                             </View>
 
                             <View className="bg-white/10 p-6 rounded-[32px] items-center border border-white/10">
                                 <Text className="text-blue-300 text-[10px] font-bold uppercase mb-2">Confirmation Probability</Text>
                                 <View className="flex-row items-baseline">
-                                    <Text className="text-5xl font-black text-white">{status.probability}</Text>
+                                    <Text className="text-3xl font-black text-white">{(status as any).probability}</Text>
                                     <Text className="text-xl font-bold text-blue-400 ml-1">%</Text>
                                 </View>
                                 <View className="w-full bg-white/10 h-2 rounded-full mt-6 overflow-hidden">
-                                    <View className="bg-blue-500 h-full" style={{ width: `${status.probability}%` as any }} />
+                                    <View className="bg-blue-500 h-full" style={{ width: `${(status as any).probability}%` as any }} />
                                 </View>
                             </View>
                         </LinearGradient>

@@ -17,14 +17,14 @@ export default function Dashboard() {
     <SafeAreaView className="flex-1 bg-white">
       <ScrollView 
         showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ padding: 20, paddingBottom: 100 }}
+        contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
       >
         
         {/* Header */}
         <View className="flex-row justify-between items-center mb-10">
             <View>
                 <Text className="text-gray-400 font-bold text-[10px] tracking-[2px] uppercase mb-1">Elite Engine 2.0</Text>
-                <Text className="text-4xl font-black text-gray-900">{user?.name || 'Explorer'}</Text>
+                <Text className="text-2xl font-black text-gray-900">{user?.name || 'Explorer'}</Text>
             </View>
             <Pressable 
                 onPress={() => signOut()} 
@@ -55,7 +55,7 @@ export default function Dashboard() {
                         <View className="flex-row justify-between items-center">
                             <View className="flex-1">
                                 <Text className="text-white/60 font-bold uppercase tracking-[2px] text-[10px] mb-3">Active Assistant</Text>
-                                <Text className="text-white text-3xl font-black mb-2">Ask SahiHai</Text>
+                                <Text className="text-white text-xl font-black mb-2">Ask SahiHai</Text>
                                 <Text className="text-indigo-100 text-sm opacity-80 leading-5">Your hyper-local engine for transit, laws, and payments.</Text>
                             </View>
                             <View className="bg-white/10 w-16 h-16 rounded-[24px] items-center justify-center border border-white/20">
@@ -78,7 +78,7 @@ export default function Dashboard() {
                         <View className="bg-red-500 w-12 h-12 rounded-2xl items-center justify-center mb-4">
                             <Ionicons name="car-outline" size={24} color="white" />
                         </View>
-                        <Text className="text-red-900 font-black text-xl">Challan</Text>
+                        <Text className="text-red-900 font-black text-lg">Challan</Text>
                         <Text className="text-red-600/70 text-xs font-bold">Check Fines</Text>
                     </GlassCard>
                 </Pressable>
@@ -90,7 +90,7 @@ export default function Dashboard() {
                         <View className="bg-blue-600 w-12 h-12 rounded-2xl items-center justify-center mb-4">
                             <Ionicons name="train-outline" size={24} color="white" />
                         </View>
-                        <Text className="text-blue-900 font-black text-xl">PNR</Text>
+                        <Text className="text-blue-900 font-black text-lg">PNR</Text>
                         <Text className="text-blue-600/70 text-xs font-bold">Train Status</Text>
                     </GlassCard>
                 </Pressable>
@@ -106,7 +106,7 @@ export default function Dashboard() {
                                     <Ionicons name="gift" size={28} color="white" />
                                 </View>
                                 <View>
-                                    <Text className="text-emerald-900 font-black text-2xl">Loot & Rewards</Text>
+                                    <Text className="text-emerald-900 font-black text-xl">Loot & Rewards</Text>
                                     <Text className="text-emerald-600 font-bold">₹150 Earned this week</Text>
                                 </View>
                             </View>

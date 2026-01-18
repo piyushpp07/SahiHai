@@ -9,6 +9,8 @@ export const getSessionStore = () => {
   }
   
   const redisClient = RedisConnection.getInstance();
+  if (!redisClient) return undefined;
+
   return new RedisStore({
     client: redisClient,
     prefix: 'sahihai:sess:',

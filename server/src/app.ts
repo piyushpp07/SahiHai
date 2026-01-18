@@ -3,7 +3,7 @@ import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import { MongoConnection } from './infrastructure/database/mongoose/connection';
-import { sessionMiddleware } from './infrastructure/redis/RedisSessionStore';
+import { sessionMiddleware } from './infrastructure/database/mongoose/MongoSessionStore';
 import { providerLockMiddleware } from './interfaces/http/middleware/providerLock';
 import logger from './infrastructure/logging/logger';
 import { env } from './config/env';

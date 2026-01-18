@@ -13,15 +13,15 @@ export const GoldRateWidget = () => {
 
     return (
         <View className="bg-yellow-50 p-4 rounded-xl border border-yellow-200">
-            <Text className="text-yellow-800 font-bold text-lg mb-2">Today&apos;s Gold Rates (10g)</Text>
+            <Text className="text-yellow-800 font-bold text-base mb-2">Today&apos;s Gold Rates (10g)</Text>
             <View className="flex-row justify-between">
                 <View>
                     <Text className="text-gray-500 text-xs">24K Pure</Text>
-                    <Text className="text-xl font-semibold">₹{data.gold24k.toLocaleString()}</Text>
+                    <Text className="text-base font-bold">₹{data.gold24k.toLocaleString()}</Text>
                 </View>
                 <View>
                     <Text className="text-gray-500 text-xs">22K Standard</Text>
-                    <Text className="text-xl font-semibold">₹{data.gold22k.toLocaleString()}</Text>
+                    <Text className="text-base font-bold">₹{data.gold22k.toLocaleString()}</Text>
                 </View>
             </View>
         </View>

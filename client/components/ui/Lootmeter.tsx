@@ -1,39 +1,21 @@
 import React from 'react';
 import { View, Text } from 'react-native';
-import { Canvas, Path, Skia, vec, LinearGradient } from "@shopify/react-native-skia";
+import Svg, { Path, Defs, LinearGradient as SvgGradient, Stop } from 'react-native-svg';
 import { GlassCard } from './GlassCard';
 
 export const Lootmeter = () => {
-  const center = { x: 105, y: 100 };
+  // SVG Calculations for a perfect semi-circle arc
+  // M startX startY A radiusX radiusY xAxisRotation largeArcFlag sweepFlag endX endY
   const radius = 80;
-
-  const backgroundArc = React.useMemo(() => {
-    try {
-      const path = Skia.Path.Make();
-      path.addArc(Skia.XYWHRect(center.x - radius, center.y - radius, radius * 2, radius * 2), 180, 180);
-      return path;
-    } catch {
-      return null;
-    }
-  }, []);
-
-  const activeArc = React.useMemo(() => {
-    try {
-      const path = Skia.Path.Make();
-      path.addArc(Skia.XYWHRect(center.x - radius, center.y - radius, radius * 2, radius * 2), 180, 180 * 0.85);
-      return path;
-    } catch {
-      return null;
-    }
-  }, []);
-
-  if (!backgroundArc || !activeArc) {
-    return (
-      <GlassCard intensity={15} className="bg-slate-900 border-white/10 p-10 rounded-[40px] items-center justify-center">
-         <Text className="text-white/20 font-bold uppercase tracking-widest text-[10px]">Initializing Engine...</Text>
-      </GlassCard>
-    );
-  }
+  const strokeWidth = 16;
+  const width = 200;
+  const height = 110;
+  
+  // Background Arc (Gray track)
+  const dBackground = "M 20 100 A 80 80 0 0 1 180 100";
+  // Active Arc (Colored part - hardcoded for 85% for now as blueprint requirement)
+  // For a partial arc, we can use strokeDasharray if needed, but a semi-circle is simple
+  const dActive = "M 20 100 A 80 80 0 0 1 180 100";
 
   return (
     <GlassCard intensity={15} className="bg-slate-900 border-white/10 p-6 rounded-[40px]">
@@ -41,29 +23,39 @@ export const Lootmeter = () => {
           <Text className="text-blue-400 font-bold uppercase tracking-[2px] text-[10px] mb-6">Action Engine Intelligence</Text>
           
           <View className="h-32 w-full items-center justify-center">
-             <Canvas style={{ width: 210, height: 120 }}>
-                <Path
-                  path={backgroundArc}
-                  color="#1e293b"
-                  style="stroke"
-                  strokeWidth={15}
-                  strokeCap="round"
-                />
-                <Path
-                  path={activeArc}
-                  style="stroke"
-                  strokeWidth={15}
-                  strokeCap="round"
-                >
-                    <LinearGradient
-                        start={vec(0, 100)}
-                        end={vec(210, 100)}
-                        colors={["#4F46E5", "#EF4444"]}
+             <View style={{ width, height }}>
+                <Svg width={width} height={height + 20} viewBox={`0 0 ${width} ${height + 20}`}>
+                    <Defs>
+                        <SvgGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                            <Stop offset="0%" stopColor="#4F46E5" />
+                            <Stop offset="100%" stopColor="#EF4444" />
+                        </SvgGradient>
+                    </Defs>
+                    
+                    {/* Background Track */}
+                    <Path
+                        d={dBackground}
+                        fill="none"
+                        stroke="#1e293b"
+                        strokeWidth={strokeWidth}
+                        strokeLinecap="round"
                     />
-                </Path>
-             </Canvas>
+                    
+                    {/* Active Progress */}
+                    <Path
+                        d={dActive}
+                        fill="none"
+                        stroke="url(#grad)"
+                        strokeWidth={strokeWidth}
+                        strokeLinecap="round"
+                        strokeDasharray="251" // Half of circumference (PI * 80)
+                        strokeDashoffset="37"  // (1 - 0.85) * 251 = 37.65
+                    />
+                </Svg>
+             </View>
+
              <View className="absolute bottom-4 items-center">
-                <Text className="text-white text-4xl font-black">8.5</Text>
+                <Text className="text-white text-2xl font-black">8.5</Text>
                 <Text className="text-red-500 font-black text-[10px] uppercase tracking-widest mt-1">Extreme Risk</Text>
              </View>
           </View>

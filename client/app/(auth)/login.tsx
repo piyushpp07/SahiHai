@@ -1,10 +1,11 @@
 import { useState } from 'react';
-import { View, Text, TextInput, Pressable, ActivityIndicator, Alert, ScrollView } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, Alert, ScrollView } from 'react-native';
 import { useAuth } from '../../context/AuthContext';
 import { Link } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { EliteInput } from '../../components/ui/EliteInput';
 
 export default function Login() {
     const { signIn } = useAuth();
@@ -29,54 +30,44 @@ export default function Login() {
 
     return (
         <SafeAreaView className="flex-1 bg-gray-50" edges={['top']}>
-            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 28 }}>
-                <View className="bg-white/95 p-10 rounded-[48px] shadow-2xl shadow-blue-100 border border-white/60">
+            <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center', padding: 16 }}>
+                <View className="bg-white/95 p-6 rounded-[48px] shadow-2xl shadow-blue-100 border border-white/60">
                     <View className="mb-12 items-center">
                         <View className="shadow-xl shadow-blue-200">
                             <LinearGradient
                                 colors={['#2563EB', '#1D4ED8']}
-                                className="w-20 h-20 rounded-[28px] items-center justify-center mb-6"
+                                className="w-16 h-16 rounded-[22px] items-center justify-center mb-6"
                             >
-                                <Ionicons name="finger-print" size={40} color="white" />
+                                <Ionicons name="finger-print" size={32} color="white" />
                             </LinearGradient>
                         </View>
-                        <Text className="text-5xl font-black text-gray-900 mb-3 tracking-tighter">Welcome</Text>
+                        <Text className="text-3xl font-black text-gray-900 mb-3 tracking-tighter">Welcome</Text>
                         <Text className="text-gray-400 font-black uppercase tracking-[2px] text-[10px]">Action Engine 2.0</Text>
                     </View>
 
                     <View className="mb-6">
                         <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-4 ml-3">Email Identity</Text>
-                        <View className="bg-gray-50/80 border border-gray-100 flex-row items-center px-6 rounded-[28px]">
-                            <Ionicons name="mail" size={22} color="#9CA3AF" />
-                            <TextInput 
-                                className="flex-1 px-5 h-16 text-xl font-bold"
-                                style={{ color: '#111827', textAlignVertical: 'center' }}
-                                placeholder="you@sahihai.com"
-                                placeholderTextColor="#D1D5DB"
-                                selectionColor="#2563eb"
-                                value={email}
-                                onChangeText={setEmail}
-                                autoCapitalize="none" 
-                                keyboardType="email-address"
-                            />
-                        </View>
+                        <EliteInput
+                            icon="mail"
+                            iconColor="#2563EB"
+                            placeholder="you@sahihai.com"
+                            value={email}
+                            onChangeText={setEmail}
+                            autoCapitalize="none"
+                            keyboardType="email-address"
+                        />
                     </View>
 
                     <View className="mb-12">
                         <Text className="text-gray-400 text-[10px] font-black uppercase tracking-widest mb-4 ml-3">Secure Key</Text>
-                        <View className="bg-gray-50/80 border border-gray-100 flex-row items-center px-6 rounded-[28px]">
-                            <Ionicons name="lock-closed" size={22} color="#9CA3AF" />
-                            <TextInput 
-                                className="flex-1 px-5 h-16 text-xl font-bold"
-                                style={{ color: '#111827', textAlignVertical: 'center' }}
-                                placeholder="••••••••"
-                                placeholderTextColor="#D1D5DB"
-                                selectionColor="#2563eb"
-                                value={password}
-                                onChangeText={setPassword}
-                                secureTextEntry
-                            />
-                        </View>
+                        <EliteInput
+                            icon="lock-closed"
+                            iconColor="#2563EB"
+                            placeholder="••••••••"
+                            value={password}
+                            onChangeText={setPassword}
+                            secureTextEntry
+                        />
                     </View>
 
                     <Pressable 
@@ -91,7 +82,7 @@ export default function Login() {
                             colors={['#2563EB', '#1D4ED8']}
                             start={{ x: 0, y: 0 }}
                             end={{ x: 1, y: 1 }}
-                            className="w-full py-6 rounded-[28px] items-center shadow-2xl shadow-blue-400"
+                            className="w-full py-4 rounded-[22px] items-center shadow-2xl shadow-blue-400"
                         >
                             {loading ? (
                                 <ActivityIndicator color="#fff" />
