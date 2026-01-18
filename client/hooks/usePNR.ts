@@ -4,7 +4,7 @@ interface PNRStatus {
     pnr: string;
     trainName: string;
     date: string;
-    status: 'CNF' | 'WL' | 'RAC';
+    status: string;
     probability?: number;
 }
 
