@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 import { ChatSession, ChatMessage } from '../../../../domain/entities/ChatSession';
 
 const ChatMessageSchema = new Schema<ChatMessage>({
@@ -18,3 +18,5 @@ export const ChatSessionSchema = new Schema<ChatSession>({
   },
   lastActiveAt: { type: Date, default: Date.now },
 }, { timestamps: true });
+
+export const ChatSessionModel = mongoose.models.ChatSession || mongoose.model<ChatSession>('ChatSession', ChatSessionSchema);

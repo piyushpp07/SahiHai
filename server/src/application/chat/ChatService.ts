@@ -1,7 +1,7 @@
 import { createAgent } from '../ai/agent';
-import { ChatSessionModel } from '../../infrastructure/database/mongoose/models/ChatSessionModel';
+import { ChatSessionModel } from '../../infrastructure/database/mongoose/schemas/ChatSessionSchema';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
-import { Message } from '../../domain/ChatSession';
+import { ChatMessage as Message } from '../../domain/entities/ChatSession';
 
 export class ChatService {
     private agent = createAgent();

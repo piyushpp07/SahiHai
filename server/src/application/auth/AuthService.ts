@@ -1,22 +1,18 @@
-import { UserModel } from '../../infrastructure/database/mongoose/models/UserModel';
+import { UserModel } from '../../infrastructure/database/mongoose/schemas/UserSchema';
 import bcrypt from 'bcryptjs';
-import { User } from '../../domain/User';
+import { User } from '../../domain/entities/User';
 
 export class AuthService {
     
     async login(email: string, password: string): Promise<User | null> {
-        const user = await UserModel.findOne({ email });
+        const user = await UserModel.findOne({ email }).lean() as any;
         if (!user) return null;
 
         const isValid = await bcrypt.compare(password, user.passwordHash || '');
         if (!isValid) return null;
         
-        return {
-            id: user.id,
-            name: user.name,
-            email: user.email,
-            preferences: user.preferences
-        };
+        const { _id, ...rest } = user;
+        return { id: _id.toString(), ...rest } as User;
     }
 
 
@@ -30,15 +26,14 @@ export class AuthService {
          const newUser = await UserModel.create({
              email,
              name,
-             passwordHash, // Ensure model supports this field or ignored if schema strict
-             preferences: { language: 'en', theme: 'light' }
+             passwordHash,
+             tier: 'free',
+             preferences: { language: 'en', theme: 'light' },
+             createdAt: new Date()
          });
 
-         return {
-             id: newUser.id,
-             name: newUser.name,
-             email: newUser.email,
-             preferences: newUser.preferences
-         };
+         const doc = newUser.toObject();
+         const { _id, ...rest } = doc;
+         return { id: _id.toString(), ...rest } as User;
     }
 }
