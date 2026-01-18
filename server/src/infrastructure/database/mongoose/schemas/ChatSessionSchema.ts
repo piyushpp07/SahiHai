@@ -10,10 +10,10 @@ const ChatMessageSchema = new Schema<ChatMessage>({
 export const ChatSessionSchema = new Schema<ChatSession>({
   userId: { type: String, required: true, index: true },
   threadId: { type: String, required: true, unique: true, index: true },
-  provider: { type: String, enum: ['openai', 'anthropic', 'gemini'], required: true },
+  provider: { type: String, enum: ['openai', 'gemini'], required: true },
   history: [ChatMessageSchema],
   metadata: {
-    model: { type: String, required: true },
+    model: { type: String, required: true, default: 'gemini-1.5-pro' },
     context: { type: Map, of: Schema.Types.Mixed, default: {} },
   },
   lastActiveAt: { type: Date, default: Date.now },

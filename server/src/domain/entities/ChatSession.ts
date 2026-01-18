@@ -1,6 +1,6 @@
 import { BaseMessage } from "@langchain/core/messages";
 
-export type LLMProvider = 'openai' | 'anthropic' | 'gemini';
+export type LLMProvider = 'openai' | 'gemini';
 
 export interface ChatMessage {
   text: string;

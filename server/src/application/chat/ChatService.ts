@@ -15,7 +15,11 @@ export class ChatService {
                 threadId: chatId,
                 userId: userId,
                 history: [],
-                provider: 'gemini'
+                provider: 'gemini',
+                metadata: {
+                    model: 'gemini-1.5-pro',
+                    context: {}
+                }
             });
         }
 
